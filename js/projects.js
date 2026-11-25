@@ -14,18 +14,18 @@ const PROJECTS = [
     tags: ['React Native', 'Expo', 'TypeScript', 'Neon PostgreSQL']
   },
   {
-    id: 'ride-hailing',
-    name: 'App de Mobilidade (Ride-Hailing)',
+    id: 'huby-mobilidade',
+    name: 'HUBy — Mobilidade Urbana',
     category: 'mobile',
     categoryLabel: 'Mobile',
     status: 'Testes em campo (APK)',
-    summary: 'Aplicativo de mobilidade urbana estilo Uber com assistente de voz para motoristas, locação de veículos e parcerias locais.',
+    summary: 'Plataforma de mobilidade urbana com assistente de voz/IA, locação de veículos, vitrine de parceiros e assinaturas.',
     highlights: [
-      'Assistente de voz voltado ao motorista e vitrine de locação de carros',
-      'Cupons/parcerias com comércios locais e assinatura de motoristas via web',
-      'Compilação Android APK para testes práticos em campo'
+      'Assistente de voz para motoristas, agendamento de corridas, cupons e paradas extras',
+      'Vitrine de parceiros, locação de veículos e faixas de comissão para motoristas',
+      'Testes em campo via Expo Go / APK com backend e banco Neon PostgreSQL'
     ],
-    tags: ['React Native', 'Expo', 'TypeScript', 'Voice AI']
+    tags: ['React Native', 'Expo', 'TypeScript', 'Neon PostgreSQL', 'Voice AI']
   },
   {
     id: 'vr-modas',

@@ -167,11 +167,11 @@
   pointer-events: none;
 }
 
-/* Ajuste fino sobre os olhos no retrato */
+/* Ajuste fino sobre os olhos na foto */
 .sharingan-eye {
   position: absolute;
-  width: 30px;
-  height: 30px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   mix-blend-mode: screen;
   filter: drop-shadow(0 0 7px rgba(239, 68, 68, 0.95));
@@ -179,12 +179,12 @@
 }
 
 .sharingan-eye--left {
-  top: 42.5%;
+  top: 52.5%;
   left: 36.8%;
 }
 
 .sharingan-eye--right {
-  top: 42.5%;
+  top: 52.5%;
   left: 53.8%;
 }
 

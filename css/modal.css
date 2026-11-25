@@ -1,0 +1,91 @@
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.modal.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal__backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.78);
+  backdrop-filter: blur(6px);
+}
+
+.modal__dialog {
+  position: relative;
+  z-index: 1;
+  width: min(560px, 100%);
+  padding: 28px;
+  border-radius: var(--radius-lg);
+  background: #0d1322;
+  border: 1px solid var(--border);
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.7);
+  transform: translate3d(0, 14px, 0) scale(0.98);
+  transition: transform 0.3s var(--ease-smooth);
+}
+
+.modal.is-open .modal__dialog {
+  transform: translate3d(0, 0, 0) scale(1);
+}
+
+.modal__close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+  font-size: 0.95rem;
+}
+
+.modal__category {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  color: #f87171;
+  text-transform: uppercase;
+}
+
+.modal__dialog h3 {
+  margin-top: 6px;
+  font-size: 1.4rem;
+}
+
+.modal__desc {
+  margin-top: 12px;
+  color: #cbd5e1;
+  font-size: 0.95rem;
+}
+
+.modal__highlights {
+  margin: 18px 0 20px;
+  display: grid;
+  gap: 8px;
+}
+
+.modal__highlights li {
+  list-style: none;
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  padding-left: 16px;
+  position: relative;
+}
+
+.modal__highlights li::before {
+  content: '•';
+  position: absolute;
+  left: 0;
+  color: #ef4444;
+}

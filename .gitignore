@@ -1,4 +1,5 @@
-.DS_Store
-Thumbs.db
-.vscode/
-.idea/
+# Ignorar variáveis de ambiente (Senhas e chaves do banco)
+.env
+
+# Ignorar pastas de dependências do Node
+node_modules/

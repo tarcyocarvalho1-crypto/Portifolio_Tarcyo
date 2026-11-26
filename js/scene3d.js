@@ -20,7 +20,6 @@
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isMobile ? 1.5 : 2));
 
-  // Grupo central atmosférico (núcleo cristalino + anéis orbitais)
   const coreGroup = new THREE.Group();
   scene.add(coreGroup);
 
@@ -44,7 +43,6 @@
   const innerCrystal = new THREE.Mesh(geoInner, matInner);
   coreGroup.add(innerCrystal);
 
-  // Anéis orbitais
   const ringGeo = new THREE.TorusGeometry(3.4, 0.012, 8, isMobile ? 64 : 120);
   const ringMat = new THREE.MeshBasicMaterial({
     color: 0x94a3b8,
@@ -60,7 +58,6 @@
   orbitalRing2.scale.setScalar(1.22);
   coreGroup.add(orbitalRing2);
 
-  // Campo de partículas (neve/poeira espacial estilo Igloo)
   const particleCount = isMobile ? 320 : 750;
   const positions = new Float32Array(particleCount * 3);
   for (let i = 0; i < particleCount * 3; i += 3) {
@@ -80,26 +77,17 @@
   const particles = new THREE.Points(particleGeo, particleMat);
   scene.add(particles);
 
-  // Interação de ponteiro (mouse no PC + toque no celular)
   const pointer = { x: 0, y: 0, targetX: 0, targetY: 0 };
-
   function updatePointer(clientX, clientY) {
     pointer.targetX = (clientX / window.innerWidth) * 2 - 1;
     pointer.targetY = -(clientY / window.innerHeight) * 2 + 1;
   }
 
   window.addEventListener('pointermove', (e) => updatePointer(e.clientX, e.clientY), { passive: true });
-  window.addEventListener(
-    'touchmove',
-    (e) => {
-      if (e.touches && e.touches[0]) {
-        updatePointer(e.touches[0].clientX, e.touches[0].clientY);
-      }
-    },
-    { passive: true }
-  );
+  window.addEventListener('touchmove', (e) => {
+    if (e.touches && e.touches[0]) updatePointer(e.touches[0].clientX, e.touches[0].clientY);
+  }, { passive: true });
 
-  // Estados da câmera por seção (scroll-driven)
   const stagePresets = [
     { camX: 0, camY: 0, camZ: isMobile ? 11.5 : 9.2, rotY: 0.0, scale: 1.0, color: 0xef4444 },
     { camX: isMobile ? 0 : -2.1, camY: 0.4, camZ: isMobile ? 10.2 : 7.8, rotY: 1.1, scale: 1.15, color: 0xf97316 },
@@ -109,9 +97,7 @@
 
   let scrollProgress = 0;
   window.SceneController = {
-    setScrollProgress(p) {
-      scrollProgress = Math.min(Math.max(p, 0), 1);
-    }
+    setScrollProgress(p) { scrollProgress = Math.min(Math.max(p, 0), 1); }
   };
 
   window.addEventListener('resize', () => {
@@ -122,15 +108,24 @@
 
   const clock = new THREE.Clock();
   const targetColor = new THREE.Color(0xef4444);
+  
+  // OTIMIZAÇÃO: Pausa o renderizador se a aba do navegador estiver inativa
+  let isTabActive = true;
+  document.addEventListener('visibilitychange', () => {
+    isTabActive = !document.hidden;
+  });
 
   function animate() {
     requestAnimationFrame(animate);
+    
+    // Poupa bateria cortando cálculos quando não está visível
+    if (!isTabActive) return;
+
     const elapsed = clock.getElapsedTime();
 
     pointer.x += (pointer.targetX - pointer.x) * 0.05;
     pointer.y += (pointer.targetY - pointer.y) * 0.05;
 
-    // Interpola entre os 4 estágios conforme o scroll
     const scaled = scrollProgress * (stagePresets.length - 1);
     const idx = Math.floor(scaled);
     const nextIdx = Math.min(idx + 1, stagePresets.length - 1);

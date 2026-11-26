@@ -1,0 +1,23 @@
+{
+  "name": "portifoliotarcyo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tarcyocarvalho1-crypto/Portifolio_Tarcyo.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tarcyocarvalho1-crypto/Portifolio_Tarcyo/issues"
+  },
+  "homepage": "https://github.com/tarcyocarvalho1-crypto/Portifolio_Tarcyo#readme",
+  "dependencies": {
+    "@neondatabase/serverless": "^1.2.1"
+  }
+}

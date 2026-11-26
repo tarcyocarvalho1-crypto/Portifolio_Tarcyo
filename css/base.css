@@ -1,17 +1,17 @@
 :root {
-  --bg: #07090f;
-  --bg-elevated: #0d121d;
-  --surface: rgba(17, 24, 39, 0.72);
-  --surface-hover: rgba(24, 34, 54, 0.92);
+  --bg: #05070c;
+  --bg-panel: rgba(11, 16, 27, 0.62);
+  --bg-panel-hover: rgba(17, 25, 42, 0.82);
   --border: rgba(148, 163, 184, 0.16);
+  --border-accent: rgba(239, 68, 68, 0.42);
   --text: #f8fafc;
   --text-muted: #94a3b8;
   --accent: #ef4444;
-  --accent-soft: rgba(239, 68, 68, 0.18);
-  --secondary: #6366f1;
+  --accent-glow: rgba(239, 68, 68, 0.25);
+  --indigo: #6366f1;
   --radius-lg: 22px;
   --radius-md: 14px;
-  --ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 *,
@@ -24,6 +24,7 @@
 
 html {
   scroll-behavior: smooth;
+  background-color: var(--bg);
 }
 
 body {
@@ -33,11 +34,6 @@ body {
   line-height: 1.6;
   overflow-x: clip;
   -webkit-font-smoothing: antialiased;
-}
-
-img {
-  display: block;
-  max-width: 100%;
 }
 
 a {
@@ -53,38 +49,40 @@ button {
   color: inherit;
 }
 
+img {
+  display: block;
+  max-width: 100%;
+}
+
 .container {
-  width: min(1140px, 92vw);
+  width: min(1160px, 90vw);
   margin-inline: auto;
 }
 
-.scroll-progress {
+.glass-panel {
+  background: var(--bg-panel);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid var(--border);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.48);
+}
+
+/* TOPBAR */
+.topbar {
   position: fixed;
   top: 0;
   left: 0;
-  height: 3px;
-  width: 100%;
-  transform-origin: left center;
-  transform: scaleX(0);
-  background: linear-gradient(90deg, var(--accent), var(--secondary));
-  z-index: 100;
-  will-change: transform;
-}
-
-.topbar {
-  position: sticky;
-  top: 0;
-  z-index: 50;
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  background: rgba(7, 9, 15, 0.72);
+  right: 0;
+  z-index: 60;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
   border-bottom: 1px solid transparent;
-  transition: border-color 0.25s ease, background-color 0.25s ease;
 }
 
 .topbar.is-scrolled {
+  background: rgba(5, 7, 12, 0.82);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border-bottom-color: var(--border);
-  background: rgba(7, 9, 15, 0.9);
 }
 
 .topbar__inner {
@@ -100,12 +98,13 @@ button {
   gap: 10px;
   font-family: 'JetBrains Mono', monospace;
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
+  letter-spacing: 0.06em;
 }
 
 .brand__dot {
-  width: 9px;
-  height: 9px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: var(--accent);
   box-shadow: 0 0 12px var(--accent);
@@ -113,28 +112,44 @@ button {
 
 .nav {
   display: flex;
-  gap: 24px;
-  font-size: 0.92rem;
+  gap: 22px;
+  font-size: 0.88rem;
   color: var(--text-muted);
 }
 
 .nav a {
+  position: relative;
+  padding-block: 4px;
   transition: color 0.2s ease;
 }
 
-.nav a:hover {
+.nav a:hover,
+.nav a.is-active {
   color: var(--text);
 }
 
+.nav a.is-active::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -2px;
+  height: 2px;
+  background: var(--accent);
+  border-radius: 2px;
+}
+
+/* BOTÕES */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 8px;
   padding: 12px 22px;
   border-radius: 12px;
   font-weight: 600;
-  font-size: 0.94rem;
-  transition: transform 0.25s var(--ease-smooth), background-color 0.25s ease, border-color 0.25s ease;
+  font-size: 0.9rem;
+  transition: transform 0.25s var(--ease-out), box-shadow 0.25s ease, background-color 0.25s ease, border-color 0.25s ease;
   will-change: transform;
 }
 
@@ -145,7 +160,7 @@ button {
 .btn--primary {
   background: linear-gradient(135deg, #dc2626, #991b1b);
   color: #fff;
-  box-shadow: 0 10px 28px rgba(220, 38, 38, 0.28);
+  box-shadow: 0 12px 30px rgba(220, 38, 38, 0.32);
 }
 
 .btn--ghost {
@@ -155,28 +170,13 @@ button {
 }
 
 .btn--ghost:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.09);
+  border-color: rgba(255, 255, 255, 0.26);
 }
 
-.reveal {
-  opacity: 0;
-  transform: translate3d(0, 22px, 0);
-  transition: opacity 0.65s var(--ease-smooth), transform 0.65s var(--ease-smooth);
-  will-change: opacity, transform;
-}
-
-.reveal.is-visible {
-  opacity: 1;
-  transform: translate3d(0, 0, 0);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
-  .reveal {
-    opacity: 1;
-    transform: none;
-    transition: none;
+@media (max-width: 680px) {
+  .nav {
+    gap: 14px;
+    font-size: 0.8rem;
   }
 }

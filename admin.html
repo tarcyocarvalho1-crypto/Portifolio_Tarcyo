@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin // Tarcyo.dev</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./css/base.css" />
+  <style>
+    body { background-color: #05070c; padding: 40px 20px; }
+    .admin-container { max-width: 900px; margin: 0 auto; }
+    .glass-panel { padding: 30px; border-radius: var(--radius-lg); margin-bottom: 24px; }
+    
+    /* Login */
+    #loginScreen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 80vh; }
+    .login-box { text-align: center; width: 100%; max-width: 400px; }
+    input[type="password"], input[type="text"], textarea {
+      width: 100%; padding: 12px 16px; margin: 8px 0 20px; border-radius: 8px;
+      background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border);
+      color: var(--text); font-family: 'Inter', sans-serif;
+    }
+    input:focus, textarea:focus { border-color: var(--accent); outline: none; }
+    
+    /* Dashboard */
+    #dashboard { display: none; }
+    .header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+    .eyebrow { color: var(--accent); font-family: 'JetBrains Mono'; font-size: 0.8rem; text-transform: uppercase; }
+    
+    .project-list-item {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 16px; border-bottom: 1px solid var(--border);
+    }
+    .project-list-item:last-child { border-bottom: none; }
+    .project-actions button { margin-left: 10px; font-size: 0.85rem; color: #94a3b8; }
+    .project-actions button:hover { color: var(--text); }
+    .project-actions .btn-delete:hover { color: #ef4444; }
+
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 20px; }
+    @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } }
+    label { font-size: 0.85rem; color: var(--text-muted); font-family: 'JetBrains Mono'; }
+  </style>
+</head>
+<body>
+
+  <!-- TELA DE LOGIN -->
+  <div id="loginScreen" class="admin-container">
+    <div class="login-box glass-panel">
+      <span class="eyebrow">Acesso Restrito</span>
+      <h2 style="margin-bottom: 24px;">Painel de Controlo</h2>
+      <input type="password" id="adminPassword" placeholder="Insira a chave de acesso (ADMIN_SECRET)..." />
+      <button class="btn btn--primary" style="width: 100%;" onclick="login()">Autenticar</button>
+      <p id="loginError" style="color: #ef4444; font-size: 0.85rem; margin-top: 14px; display: none;">Chave incorreta.</p>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div id="dashboard" class="admin-container">
+    <div class="header-flex">
+      <div>
+        <span class="eyebrow">SYS // ADMIN</span>
+        <h2>Gestão de Portfólio</h2>
+      </div>
+      <button class="btn btn--ghost" onclick="logout()">Sair</button>
+    </div>
+
+    <!-- Lista de Projetos -->
+    <div class="glass-panel">
+      <div class="header-flex" style="margin-bottom: 10px;">
+        <h3>Projetos Publicados</h3>
+        <button class="btn btn--primary" onclick="openForm()">+ Novo Projeto</button>
+      </div>
+      <div id="projectsList">
+        <p style="color: var(--text-muted); font-size: 0.9rem;">A carregar dados do Neon...</p>
+      </div>
+    </div>
+
+    <!-- Formulário de Criação/Edição -->
+    <div class="glass-panel" id="projectFormPanel" style="display: none;">
+      <h3 id="formTitle" style="margin-bottom: 20px;">Editar Projeto</h3>
+      <form id="projectForm" onsubmit="saveProject(event)">
+        <div class="form-grid">
+          <div>
+            <label>ID Único (ex: huby-app)</label>
+            <input type="text" id="f_id" required />
+          </div>
+          <div>
+            <label>Nome do Projeto (ex: HUBy)</label>
+            <input type="text" id="f_name" required />
+          </div>
+          <div>
+            <label>Filtro (mobile, web, interativo)</label>
+            <input type="text" id="f_category" required />
+          </div>
+          <div>
+            <label>Etiqueta (ex: Mobile)</label>
+            <input type="text" id="f_category_label" required />
+          </div>
+          <div>
+            <label>Status (ex: Em desenvolvimento)</label>
+            <input type="text" id="f_status" required />
+          </div>
+          <div>
+            <label>Link Externo (URL ou vazio)</label>
+            <input type="text" id="f_demo_url" />
+          </div>
+        </div>
+
+        <label>Resumo Curto</label>
+        <textarea id="f_summary" rows="2" required></textarea>
+
+        <label>Destaques (Separados por vírgula)</label>
+        <textarea id="f_highlights" rows="2" required placeholder="Integração PIX, Painel Admin, Geolocalização"></textarea>
+
+        <label>Tags de Tecnologia (Separadas por vírgula)</label>
+        <input type="text" id="f_tags" required placeholder="React Native, Node.js, Neon" />
+
+        <div style="display: flex; gap: 14px; margin-top: 10px;">
+          <button type="submit" class="btn btn--primary" id="saveBtn">Guardar na Base de Dados</button>
+          <button type="button" class="btn btn--ghost" onclick="closeForm()">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = 'http://localhost:3000/api/projects';
+    let adminToken = sessionStorage.getItem('adminToken') || '';
+    let projectsData = [];
+    let isEditing = false;
+
+    if (adminToken) showDashboard();
+
+    function login() {
+      const pass = document.getElementById('adminPassword').value;
+      if (!pass) return;
+      adminToken = pass;
+      sessionStorage.setItem('adminToken', adminToken);
+      document.getElementById('loginError').style.display = 'none';
+      showDashboard();
+    }
+
+    function logout() {
+      sessionStorage.removeItem('adminToken');
+      adminToken = '';
+      document.getElementById('dashboard').style.display = 'none';
+      document.getElementById('loginScreen').style.display = 'flex';
+    }
+
+    async function showDashboard() {
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('dashboard').style.display = 'block';
+      await loadProjects();
+    }
+
+    async function loadProjects() {
+      try {
+        const res = await fetch(API_URL);
+        if (!res.ok) throw new Error('Falha ao ler dados');
+        const data = await res.json();
+        projectsData = data.projects || [];
+        renderList();
+      } catch (err) {
+        document.getElementById('projectsList').innerHTML = `<p style="color:#ef4444;">Erro de ligação: Verifica se o 'node server.js' está a correr.</p>`;
+      }
+    }
+
+    function renderList() {
+      const listEl = document.getElementById('projectsList');
+      if (projectsData.length === 0) {
+        listEl.innerHTML = '<p style="color: var(--text-muted);">Nenhum projeto encontrado. Adiciona o primeiro!</p>';
+        return;
+      }
+      listEl.innerHTML = projectsData.map(p => `
+        <div class="project-list-item">
+          <div>
+            <strong>${p.name}</strong> <span style="color: var(--text-muted); font-size: 0.8rem;">— ${p.category_label}</span>
+          </div>
+          <div class="project-actions">
+            <button onclick="editProject('${p.id}')">Editar</button>
+            <button class="btn-delete" onclick="deleteProject('${p.id}')">Remover</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function openForm(project = null) {
+      document.getElementById('projectFormPanel').style.display = 'block';
+      isEditing = !!project;
+      document.getElementById('formTitle').textContent = isEditing ? 'Editar Projeto' : 'Novo Projeto';
+      document.getElementById('f_id').value = project ? project.id : '';
+      document.getElementById('f_id').disabled = isEditing; 
+      document.getElementById('f_name').value = project ? project.name : '';
+      document.getElementById('f_category').value = project ? project.category : '';
+      document.getElementById('f_category_label').value = project ? project.category_label : '';
+      document.getElementById('f_status').value = project ? project.status : '';
+      document.getElementById('f_demo_url').value = project ? (project.demo_url || '') : '';
+      document.getElementById('f_summary').value = project ? project.summary : '';
+      document.getElementById('f_highlights').value = project && project.highlights ? project.highlights.join(', ') : '';
+      document.getElementById('f_tags').value = project && project.tags ? project.tags.join(', ') : '';
+      document.getElementById('projectFormPanel').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function closeForm() {
+      document.getElementById('projectFormPanel').style.display = 'none';
+      document.getElementById('projectForm').reset();
+    }
+
+    function editProject(id) {
+      const p = projectsData.find(item => item.id === id);
+      if (p) openForm(p);
+    }
+
+    async function saveProject(e) {
+      e.preventDefault();
+      const btn = document.getElementById('saveBtn');
+      btn.textContent = 'A guardar...';
+      btn.disabled = true;
+
+      const payload = {
+        id: document.getElementById('f_id').value,
+        name: document.getElementById('f_name').value,
+        category: document.getElementById('f_category').value,
+        category_label: document.getElementById('f_category_label').value,
+        status: document.getElementById('f_status').value,
+        visible: true,
+        demo_url: document.getElementById('f_demo_url').value,
+        summary: document.getElementById('f_summary').value,
+        highlights: document.getElementById('f_highlights').value.split(',').map(s => s.trim()).filter(Boolean),
+        tags: document.getElementById('f_tags').value.split(',').map(s => s.trim()).filter(Boolean)
+      };
+
+      try {
+        const res = await fetch(API_URL, {
+          method: isEditing ? 'PUT' : 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
+          body: JSON.stringify(payload)
+        });
+
+        if (res.status === 401) {
+          logout();
+          alert('Sessão expirada ou chave incorreta.');
+          return;
+        }
+        await loadProjects();
+        closeForm();
+      } catch (err) {
+        alert('Erro ao guardar: ' + err.message);
+      } finally {
+        btn.textContent = 'Guardar na Base de Dados';
+        btn.disabled = false;
+      }
+    }
+
+    async function deleteProject(id) {
+      if (!confirm(`Remover o projeto "${id}" definitivamente?`)) return;
+      try {
+        const res = await fetch(API_URL, {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
+          body: JSON.stringify({ deleteId: id })
+        });
+        if (res.status === 401) { logout(); return; }
+        await loadProjects();
+      } catch (err) {
+        alert('Erro ao remover: ' + err.message);
+      }
+    }
+  </script>
+</body>
+</html>

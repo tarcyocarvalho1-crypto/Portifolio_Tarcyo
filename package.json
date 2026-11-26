@@ -18,6 +18,9 @@
   },
   "homepage": "https://github.com/tarcyocarvalho1-crypto/Portifolio_Tarcyo#readme",
   "dependencies": {
-    "@neondatabase/serverless": "^1.2.1"
+    "@neondatabase/serverless": "^1.2.1",
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.10",
+    "express": "^5.3.0"
   }
 }

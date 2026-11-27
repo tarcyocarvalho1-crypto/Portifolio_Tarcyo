@@ -19,7 +19,7 @@
 
   if (yearEl) yearEl.textContent = new Date().getFullYear();
 
-  // SEGURANÇA ANTI-XSS: Escapa qualquer HTML malicioso antes de renderizar
+  // SEGURANÇA ANTI-XSS
   function escapeHTML(str) {
     return String(str ?? '')
       .replace(/&/g, '&amp;')
@@ -29,7 +29,6 @@
       .replace(/'/g, '&#39;');
   }
 
-  // SEGURANÇA DE LINKS: Aceita apenas http:// ou https:// (bloqueia javascript:)
   function getSafeUrl(url) {
     const clean = String(url || '').trim();
     return /^https?:\/\//i.test(clean) ? escapeHTML(clean) : '';
@@ -58,6 +57,7 @@
   portraitCard?.addEventListener('click', registerOwnerTap);
   brandTrigger?.addEventListener('click', registerOwnerTap);
 
+  // FÁBRICA DE CARDS
   function createProjectCard(project) {
     const safeId = escapeHTML(project.id);
     const safeUrl = getSafeUrl(project.demoUrl);
@@ -97,6 +97,7 @@
     projectsGrid.innerHTML = list.map(createProjectCard).join('');
   }
 
+  // MODAL E ROTAS
   function openProjectModal(projectId, pushState = true) {
     const project = projects.find((item) => item.id === projectId);
     if (!project || !modal) return;
@@ -169,6 +170,7 @@
     }
   });
 
+  // EFEITO 3D DO RETRATO NO HOVER (Desktop)
   if (portraitCard && window.matchMedia('(pointer: fine)').matches) {
     portraitCard.addEventListener('mousemove', (e) => {
       const rect = portraitCard.getBoundingClientRect();
@@ -181,16 +183,27 @@
     });
   }
 
+  // MOTOR DE PARALLAX & SCROLL OBSERVER (60 FPS)
   const sections = document.querySelectorAll('.story-section');
   const navLinks = document.querySelectorAll('.nav a');
-  let ticking = false;
+  const parallaxItems = document.querySelectorAll('[data-parallax]');
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const isDesktop = window.matchMedia('(min-width: 769px)').matches;
 
-  function onScrollUpdate() {
-    const scrollTop = window.scrollY || window.pageYOffset;
+  let currentScroll = window.scrollY || 0;
+  let targetScroll = currentScroll;
+
+  window.addEventListener('scroll', () => {
+    targetScroll = window.scrollY || window.pageYOffset;
+  }, { passive: true });
+
+  function renderScrollLoop() {
+    currentScroll += (targetScroll - currentScroll) * 0.1;
+
     const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-    const progress = maxScroll > 0 ? Math.min(Math.max(scrollTop / maxScroll, 0), 1) : 0;
+    const progress = maxScroll > 0 ? Math.min(Math.max(currentScroll / maxScroll, 0), 1) : 0;
 
-    if (topbarEl) topbarEl.classList.toggle('is-scrolled', scrollTop > 20);
+    if (topbarEl) topbarEl.classList.toggle('is-scrolled', currentScroll > 20);
     if (progressBarEl) progressBarEl.style.transform = `scaleX(${progress})`;
     if (hudPercentEl) hudPercentEl.textContent = `SCROLL ${String(Math.round(progress * 100)).padStart(2, '0')}%`;
     if (hudCoordsEl) hudCoordsEl.textContent = `Z: ${(progress * 10).toFixed(2)} · 60FPS`;
@@ -199,7 +212,18 @@
       window.SceneController.setScrollProgress(progress);
     }
 
-    const midViewport = scrollTop + window.innerHeight * 0.45;
+    if (!prefersReducedMotion && isDesktop) {
+      const viewportCenter = currentScroll + window.innerHeight * 0.5;
+      parallaxItems.forEach((el) => {
+        const speed = parseFloat(el.dataset.parallax) || 0;
+        const rect = el.getBoundingClientRect();
+        const elCenter = currentScroll + rect.top + rect.height * 0.5;
+        const offset = (viewportCenter - elCenter) * speed;
+        el.style.transform = `translate3d(0, ${offset.toFixed(2)}px, 0)`;
+      });
+    }
+
+    const midViewport = currentScroll + window.innerHeight * 0.45;
     sections.forEach((sec) => {
       const top = sec.offsetTop;
       const height = sec.offsetHeight;
@@ -213,18 +237,11 @@
       }
     });
 
-    ticking = false;
+    requestAnimationFrame(renderScrollLoop);
   }
 
-  window.addEventListener('scroll', () => {
-    if (!ticking) {
-      requestAnimationFrame(onScrollUpdate);
-      ticking = true;
-    }
-  }, { passive: true });
-
   renderProjects('all');
-  onScrollUpdate();
+  requestAnimationFrame(renderScrollLoop);
 
   const initialUrlParams = new URLSearchParams(window.location.search);
   const initialProjectId = initialUrlParams.get('project');

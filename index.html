@@ -9,17 +9,178 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
 
-  <link rel="stylesheet" href="./css/base.css" />
-  <link rel="stylesheet" href="./css/scene.css" />
-  <link rel="stylesheet" href="./css/sections.css" />
-  <link rel="stylesheet" href="./css/modal.css" />
+  <link rel="stylesheet" href="./css/base.css?v=3" />
+  <link rel="stylesheet" href="./css/scene.css?v=3" />
+  <link rel="stylesheet" href="./css/sections.css?v=3" />
+  <link rel="stylesheet" href="./css/modal.css?v=3" />
+
+  <!-- ESTILO CRÍTICO ANTI-CACHE: GARANTE TELA INICIAL CENTRALIZADA E VIDRO QUEBRADO -->
+  <style>
+    #webglScene {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 3;
+      pointer-events: none;
+    }
+
+    .intro-splash {
+      position: fixed !important;
+      inset: 0 !important;
+      width: 100vw;
+      height: 100vh;
+      z-index: 9999 !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      background: radial-gradient(circle at center, #0e1320 0%, #030508 100%) !important;
+      transition: opacity 0.85s ease, visibility 0.85s ease;
+      overflow: hidden;
+    }
+
+    .intro-splash.is-hidden {
+      opacity: 0 !important;
+      visibility: hidden !important;
+      pointer-events: none !important;
+    }
+
+    .intro-splash__smoke {
+      position: absolute;
+      width: 460px;
+      height: 460px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(239, 68, 68, 0.28) 0%, rgba(148, 163, 184, 0.16) 40%, transparent 72%);
+      filter: blur(26px);
+      animation: smokeExpand 2.2s ease-out forwards;
+    }
+
+    .intro-splash__slash {
+      position: absolute;
+      width: 150%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #ffffff, #ef4444, transparent);
+      transform: rotate(-20deg);
+      animation: slashSweep 0.6s ease-out forwards;
+    }
+
+    .intro-splash__content {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      padding: 0 20px;
+    }
+
+    .intro-splash__tag {
+      display: block;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.28em;
+      color: #ef4444;
+      margin-bottom: 10px;
+    }
+
+    .intro-splash__title {
+      font-size: clamp(2.1rem, 8vw, 4.4rem);
+      font-weight: 800;
+      letter-spacing: 0.22em;
+      color: #f8fafc;
+      margin: 0;
+      text-shadow: 0 0 32px rgba(239, 68, 68, 0.4);
+      animation: smokeReveal 1s ease-out forwards;
+    }
+
+    .intro-splash__name {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: clamp(0.9rem, 3vw, 1.2rem);
+      letter-spacing: 0.34em;
+      color: #cbd5e1;
+      margin-top: 12px;
+      animation: smokeReveal 1.2s ease-out forwards;
+    }
+
+    .portrait-frame {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .impact-flash {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle, rgba(255,255,255,0.95) 0%, rgba(239,68,68,0.55) 40%, transparent 75%);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 4;
+    }
+
+    .shatter-overlay {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 5;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
+    .shatter-overlay path {
+      fill: none;
+      stroke: rgba(255, 255, 255, 0.85);
+      stroke-width: 1.7;
+      filter: drop-shadow(0 0 5px rgba(239, 68, 68, 0.75));
+    }
+
+    .portrait-frame.is-shattered {
+      border-color: rgba(239, 68, 68, 0.75) !important;
+      box-shadow: 0 0 40px rgba(239, 68, 68, 0.35) !important;
+      animation: cardShake 0.45s ease both;
+    }
+
+    .portrait-frame.is-shattered .shatter-overlay {
+      opacity: 1 !important;
+    }
+
+    .portrait-frame.is-shattered .impact-flash {
+      animation: flashHit 0.55s ease-out forwards;
+    }
+
+    @keyframes slashSweep {
+      0% { opacity: 0; transform: rotate(-20deg) translateX(-100%); }
+      50% { opacity: 1; }
+      100% { opacity: 0; transform: rotate(-20deg) translateX(100%); }
+    }
+
+    @keyframes smokeExpand {
+      0% { transform: scale(0.25); opacity: 0; }
+      40% { opacity: 1; }
+      100% { transform: scale(1.7); opacity: 0.35; }
+    }
+
+    @keyframes smokeReveal {
+      0% { opacity: 0; filter: blur(12px); transform: scale(1.06); }
+      100% { opacity: 1; filter: blur(0); transform: scale(1); }
+    }
+
+    @keyframes cardShake {
+      0%, 100% { transform: translate3d(0, 0, 0); }
+      25% { transform: translate3d(-7px, 4px, 0) rotate(-1deg); }
+      50% { transform: translate3d(7px, -3px, 0) rotate(1deg); }
+      75% { transform: translate3d(-4px, 2px, 0); }
+    }
+
+    @keyframes flashHit {
+      0% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+  </style>
 </head>
 <body>
-  <!-- PALCO 3D (APENAS KUNAI, FUMAÇA E ESTILHAÇOS) -->
+  <!-- PALCO 3D (KUNAI & ESTILHAÇOS) -->
   <canvas id="webglScene" aria-hidden="true"></canvas>
   <div class="vignette-overlay" aria-hidden="true"></div>
 
-  <!-- TELA INICIAL CINEMATOGRÁFICA (KUNAI + FUMAÇA + NOME) -->
+  <!-- TELA INICIAL CINEMATOGRÁFICA -->
   <div class="intro-splash" id="introSplash" aria-hidden="true">
     <div class="intro-splash__smoke"></div>
     <div class="intro-splash__slash"></div>
@@ -30,12 +191,12 @@
     </div>
   </div>
 
-  <!-- BARRA DE PROGRESSO SUPERIOR DISCRETA -->
+  <!-- BARRA DE PROGRESSO SUPERIOR -->
   <div class="top-progress" aria-hidden="true">
     <div class="top-progress__bar" id="scrollProgress"></div>
   </div>
 
-  <!-- NAVEGAÇÃO SUPERIOR LIMPA -->
+  <!-- NAVEGAÇÃO SUPERIOR -->
   <header class="topbar" id="topbar">
     <div class="container topbar__inner">
       <a href="#hero" class="brand">
@@ -54,7 +215,6 @@
 
   <!-- CONTEÚDO PRINCIPAL -->
   <main id="smoothContent">
-    <!-- SEÇÃO 01: HERO + RETRATO QUE QUEBRA NO IMPACTO DA KUNAI -->
     <section class="story-section hero" id="hero">
       <div class="container hero__grid">
         <div class="hero__content glass-panel">
@@ -93,7 +253,7 @@
           </div>
         </div>
 
-        <!-- RETRATO COM EFEITO DE VIDRO QUEBRANDO AO ROLAR -->
+        <!-- RETRATO QUE QUEBRA NO IMPACTO DA KUNAI -->
         <div class="hero__visual">
           <div class="portrait-card" id="portraitCard">
             <div class="portrait-card__halo"></div>
@@ -104,17 +264,12 @@
                 class="portrait-frame__img"
               />
 
-              <!-- FLASH DE IMPACTO DA KUNAI -->
               <div class="impact-flash" id="impactFlash" aria-hidden="true"></div>
 
-              <!-- RACHADURAS DE VIDRO QUE APARECEM QUANDO A KUNAI ATINGE -->
               <svg class="shatter-overlay" id="shatterOverlay" viewBox="0 0 400 500" preserveAspectRatio="none" aria-hidden="true">
-                <!-- Ponto de impacto no centro -->
-                <circle cx="205" cy="245" r="7" fill="rgba(255,255,255,0.85)" />
-                <circle cx="205" cy="245" r="24" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="1.5" />
-                <circle cx="205" cy="245" r="56" fill="none" stroke="rgba(255,255,255,0.28)" stroke-width="1" />
-
-                <!-- Trincas radiais principais -->
+                <circle cx="205" cy="245" r="7" fill="rgba(255,255,255,0.9)" />
+                <circle cx="205" cy="245" r="24" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="1.5" />
+                <circle cx="205" cy="245" r="56" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1" />
                 <path d="M205 245 L140 165 L75 80 L15 12" />
                 <path d="M205 245 L265 150 L335 65 L392 8" />
                 <path d="M205 245 L295 225 L365 205 L400 198" />
@@ -123,11 +278,8 @@
                 <path d="M205 245 L115 310 L48 395 L6 475" />
                 <path d="M205 245 L105 235 L32 220 L0 212" />
                 <path d="M205 245 L210 130 L218 45 L222 0" />
-
-                <!-- Estilhaços transversais (teia de vidro quebrado) -->
                 <path d="M140 165 L210 130 L265 150 L295 225 L285 320 L195 350 L115 310 L105 235 Z" />
                 <path d="M75 80 L218 45 L335 65 L365 205 L345 415 L185 435 L48 395 L32 220 Z" />
-                <path d="M140 165 L105 235 M265 150 L210 130 M285 320 L295 225 M115 310 L195 350" />
               </svg>
 
               <div class="portrait-frame__caption">
@@ -140,7 +292,6 @@
       </div>
     </section>
 
-    <!-- SEÇÃO 02: PROJETOS -->
     <section class="story-section" id="projetos">
       <div class="container">
         <div class="section__header glass-panel">
@@ -161,7 +312,6 @@
       </div>
     </section>
 
-    <!-- SEÇÃO 03: STACK & ARQUITETURA -->
     <section class="story-section" id="stack">
       <div class="container">
         <div class="section__header glass-panel">
@@ -211,7 +361,6 @@
       </div>
     </section>
 
-    <!-- SEÇÃO 04: CONTATO -->
     <section class="story-section" id="contato">
       <div class="container">
         <div class="contact-box glass-panel">
@@ -253,10 +402,10 @@
     </div>
   </div>
 
-  <!-- THREE.JS LEVE VIA CDN -->
+  <!-- SCRIPTS COM ANTI-CACHE (?v=3) -->
   <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
-  <script src="./js/store.js"></script>
-  <script src="./js/scene3d.js"></script>
-  <script src="./js/main.js"></script>
+  <script src="./js/store.js?v=3"></script>
+  <script src="./js/scene3d.js?v=3"></script>
+  <script src="./js/main.js?v=3"></script>
 </body>
 </html>

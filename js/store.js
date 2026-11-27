@@ -119,8 +119,9 @@ function normalizeProject(raw) {
 
 window.PortfolioStore = {
   getApiBaseUrl() {
-    const isLocalHost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
-    if (isLocalHost && window.location.port !== '3000') {
+    const host = window.location.hostname;
+    if (host.endsWith('github.io')) return null; // GitHub Pages não possui backend Node.js
+    if (['localhost', '127.0.0.1'].includes(host) && window.location.port !== '3000') {
       return 'http://localhost:3000';
     }
     return '';
@@ -128,19 +129,21 @@ window.PortfolioStore = {
 
   async load() {
     const baseUrl = this.getApiBaseUrl();
-    try {
-      const response = await fetch(`${baseUrl}/api/projects`);
-      if (response.ok) {
-        const data = await response.json();
-        if (Array.isArray(data.projects) && data.projects.length > 0) {
-          return {
-            profile: DEFAULT_PORTFOLIO_DATA.profile,
-            projects: data.projects.map(normalizeProject)
-          };
+    if (baseUrl !== null) {
+      try {
+        const response = await fetch(`${baseUrl}/api/projects`);
+        if (response.ok) {
+          const data = await response.json();
+          if (Array.isArray(data.projects) && data.projects.length > 0) {
+            return {
+              profile: DEFAULT_PORTFOLIO_DATA.profile,
+              projects: data.projects.map(normalizeProject)
+            };
+          }
         }
+      } catch (_) {
+        // Usa o fallback local se o servidor estiver desligado
       }
-    } catch (_) {
-      // Silencioso: usa o fallback local se o servidor estiver desligado
     }
 
     return {

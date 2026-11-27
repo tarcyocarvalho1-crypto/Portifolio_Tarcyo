@@ -8,40 +8,81 @@
   const closeModalBtn = document.getElementById('closeModalBtn');
   const topbarEl = document.getElementById('topbar');
   const progressBarEl = document.getElementById('scrollProgress');
-  
-  // Elementos do HUD
+
   const hudPercentEl = document.getElementById('hudPercent');
   const hudCoordsEl = document.getElementById('hudCoords');
   const hudSectionLabelEl = document.getElementById('hudSectionLabel');
-  
+
   const portraitCard = document.getElementById('portraitCard');
+  const brandTrigger = document.querySelector('.brand');
   const yearEl = document.getElementById('year');
 
   if (yearEl) yearEl.textContent = new Date().getFullYear();
 
-  // COMPONENTIZAÇÃO: Fábrica de Cards
+  // SEGURANÇA ANTI-XSS: Escapa qualquer HTML malicioso antes de renderizar
+  function escapeHTML(str) {
+    return String(str ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  // SEGURANÇA DE LINKS: Aceita apenas http:// ou https:// (bloqueia javascript:)
+  function getSafeUrl(url) {
+    const clean = String(url || '').trim();
+    return /^https?:\/\//i.test(clean) ? escapeHTML(clean) : '';
+  }
+
+  // GATILHO OCULTO DE ADMINISTRAÇÃO (7 cliques/toques rápidos)
+  let secretClicks = 0;
+  let secretTimer = null;
+
+  function registerOwnerTap(e) {
+    secretClicks += 1;
+    clearTimeout(secretTimer);
+
+    if (secretClicks >= 7) {
+      secretClicks = 0;
+      if (e) e.preventDefault();
+      window.location.href = './admin.html';
+      return;
+    }
+
+    secretTimer = setTimeout(() => {
+      secretClicks = 0;
+    }, 1800);
+  }
+
+  portraitCard?.addEventListener('click', registerOwnerTap);
+  brandTrigger?.addEventListener('click', registerOwnerTap);
+
   function createProjectCard(project) {
+    const safeId = escapeHTML(project.id);
+    const safeUrl = getSafeUrl(project.demoUrl);
+
     return `
-      <article class="project-card glass-panel" data-id="${project.id}">
+      <article class="project-card glass-panel" data-id="${safeId}">
         <div>
           <div class="project-card__top">
-            <span class="project-card__badge">${project.categoryLabel}</span>
-            <span class="project-card__status">${project.status}</span>
+            <span class="project-card__badge">${escapeHTML(project.categoryLabel)}</span>
+            <span class="project-card__status">${escapeHTML(project.status)}</span>
           </div>
-          <h3>${project.name}</h3>
-          <p>${project.summary}</p>
+          <h3>${escapeHTML(project.name)}</h3>
+          <p>${escapeHTML(project.summary)}</p>
         </div>
         <div>
           <div class="tags">
-            ${project.tags.map((tag) => `<span>${tag}</span>`).join('')}
+            ${project.tags.map((tag) => `<span>${escapeHTML(tag)}</span>`).join('')}
           </div>
           <div class="project-card__actions">
-            <button class="project-card__link" type="button" data-open-project="${project.id}">
+            <button class="project-card__link" type="button" data-open-project="${safeId}">
               INSPECIONAR PROJETO →
             </button>
             ${
-              project.demoUrl
-                ? `<a class="project-card__link" href="${project.demoUrl}" target="_blank" rel="noopener noreferrer">ABRIR ↗</a>`
+              safeUrl
+                ? `<a class="project-card__link" href="${safeUrl}" target="_blank" rel="noopener noreferrer">ABRIR ↗</a>`
                 : ''
             }
           </div>
@@ -56,28 +97,32 @@
     projectsGrid.innerHTML = list.map(createProjectCard).join('');
   }
 
-  // SISTEMA DE ROTAS: Modais conectados à URL
   function openProjectModal(projectId, pushState = true) {
     const project = projects.find((item) => item.id === projectId);
     if (!project || !modal) return;
 
+    const safeUrl = getSafeUrl(project.demoUrl);
+
     document.getElementById('modalCategory').textContent = `${project.categoryLabel} · ${project.status}`;
     document.getElementById('modalTitle').textContent = project.name;
     document.getElementById('modalDesc').textContent = project.summary;
-    document.getElementById('modalHighlights').innerHTML = project.highlights.map((h) => `<li>${h}</li>`).join('');
-    document.getElementById('modalTags').innerHTML = project.tags.map((t) => `<span>${t}</span>`).join('');
-    
-    document.getElementById('modalFooter').innerHTML = project.demoUrl
-      ? `<a href="${project.demoUrl}" target="_blank" rel="noopener noreferrer" class="btn btn--primary">Acessar Projeto ↗</a>`
+    document.getElementById('modalHighlights').innerHTML = project.highlights
+      .map((h) => `<li>${escapeHTML(h)}</li>`)
+      .join('');
+    document.getElementById('modalTags').innerHTML = project.tags
+      .map((t) => `<span>${escapeHTML(t)}</span>`)
+      .join('');
+
+    document.getElementById('modalFooter').innerHTML = safeUrl
+      ? `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer" class="btn btn--primary">Acessar Projeto ↗</a>`
       : '';
 
     modal.classList.add('is-open');
     modal.setAttribute('aria-hidden', 'false');
     document.body.style.overflow = 'hidden';
 
-    // Atualiza a URL para permitir partilha direta
     if (pushState) {
-      window.history.pushState({ modalOpen: true, projectId }, '', `?project=${projectId}`);
+      window.history.pushState({ modalOpen: true, projectId }, '', `?project=${encodeURIComponent(projectId)}`);
     }
   }
 
@@ -87,13 +132,11 @@
     modal.setAttribute('aria-hidden', 'true');
     document.body.style.overflow = '';
 
-    // Limpa a URL ao fechar
     if (pushState) {
       window.history.pushState({ modalOpen: false }, '', window.location.pathname);
     }
   }
 
-  // EVENTOS E DELEGAÇÃO
   filterButtons.forEach((btn) => {
     btn.addEventListener('click', () => {
       filterButtons.forEach((b) => b.classList.remove('is-active'));
@@ -111,12 +154,11 @@
   modal?.addEventListener('click', (e) => {
     if (e.target.dataset.closeModal === 'true') closeProjectModal();
   });
-  
+
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') closeProjectModal();
   });
 
-  // Listener para botões Voltar/Avançar do navegador
   window.addEventListener('popstate', () => {
     const urlParams = new URLSearchParams(window.location.search);
     const projectId = urlParams.get('project');
@@ -127,7 +169,6 @@
     }
   });
 
-  // EFEITO 3D DO RETRATO NO HOVER (Desktop)
   if (portraitCard && window.matchMedia('(pointer: fine)').matches) {
     portraitCard.addEventListener('mousemove', (e) => {
       const rect = portraitCard.getBoundingClientRect();
@@ -140,7 +181,6 @@
     });
   }
 
-  // SCROLL OBSERVER OTIMIZADO
   const sections = document.querySelectorAll('.story-section');
   const navLinks = document.querySelectorAll('.nav a');
   let ticking = false;
@@ -183,15 +223,12 @@
     }
   }, { passive: true });
 
-  // INICIALIZAÇÃO E LEITURA DE ROTAS INICIAIS
   renderProjects('all');
   onScrollUpdate();
 
-  // Verifica se o visitante entrou através de um link direto para um projeto
   const initialUrlParams = new URLSearchParams(window.location.search);
   const initialProjectId = initialUrlParams.get('project');
   if (initialProjectId) {
-    // Timeout breve para garantir que a grid e o CSS renderizaram
     setTimeout(() => openProjectModal(initialProjectId, false), 150);
   }
 })();

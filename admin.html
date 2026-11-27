@@ -1,149 +1,235 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin // Tarcyo.dev</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Admin // TARCYO.DEV</title>
+  <link rel="icon" href="data:," />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="./css/base.css" />
   <style>
-    body { background-color: #05070c; padding: 40px 20px; }
-    .admin-container { max-width: 900px; margin: 0 auto; }
-    .glass-panel { padding: 30px; border-radius: var(--radius-lg); margin-bottom: 24px; }
-    
+    body { background-color: #05070c; padding: 36px 20px; min-height: 100vh; }
+    .admin-container { max-width: 920px; margin: 0 auto; }
+    .glass-panel { padding: 28px; border-radius: var(--radius-lg); margin-bottom: 24px; }
+
     /* Login */
-    #loginScreen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 80vh; }
-    .login-box { text-align: center; width: 100%; max-width: 400px; }
-    input[type="password"], input[type="text"], textarea {
-      width: 100%; padding: 12px 16px; margin: 8px 0 20px; border-radius: 8px;
-      background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border);
-      color: var(--text); font-family: 'Inter', sans-serif;
+    #loginScreen { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 82vh; }
+    .login-box { text-align: center; width: 100%; max-width: 420px; }
+    .login-box h2 { margin: 10px 0 8px; }
+    .login-box p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 24px; }
+
+    input[type="password"], input[type="text"], input[type="number"], select, textarea {
+      width: 100%; padding: 12px 14px; margin: 6px 0 18px; border-radius: 10px;
+      background: rgba(15, 23, 42, 0.72); border: 1px solid var(--border);
+      color: var(--text); font-family: 'Inter', sans-serif; font-size: 0.95rem;
+      transition: border-color 0.2s ease;
     }
-    input:focus, textarea:focus { border-color: var(--accent); outline: none; }
-    
+    input:focus, select:focus, textarea:focus { border-color: var(--accent); outline: none; }
+
     /* Dashboard */
     #dashboard { display: none; }
-    .header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-    .eyebrow { color: var(--accent); font-family: 'JetBrains Mono'; font-size: 0.8rem; text-transform: uppercase; }
-    
+    .header-flex { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 24px; }
+    .header-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    .eyebrow { color: var(--accent); font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; }
+
     .project-list-item {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 16px; border-bottom: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center; gap: 16px;
+      padding: 16px 4px; border-bottom: 1px solid var(--border);
     }
     .project-list-item:last-child { border-bottom: none; }
-    .project-actions button { margin-left: 10px; font-size: 0.85rem; color: #94a3b8; }
-    .project-actions button:hover { color: var(--text); }
-    .project-actions .btn-delete:hover { color: #ef4444; }
+    .project-meta { display: block; color: var(--text-muted); font-size: 0.82rem; margin-top: 4px; font-family: 'JetBrains Mono', monospace; }
+
+    .project-actions { display: flex; gap: 8px; flex-shrink: 0; }
+    .action-btn {
+      padding: 7px 12px; border-radius: 8px; font-size: 0.82rem; font-weight: 500;
+      background: rgba(255, 255, 255, 0.05); color: var(--text); border: 1px solid var(--border);
+      cursor: pointer; transition: all 0.2s ease;
+    }
+    .action-btn:hover { border-color: rgba(255, 255, 255, 0.25); }
+    .action-btn--danger:hover { border-color: #ef4444; color: #fca5a5; background: rgba(239, 68, 68, 0.12); }
 
     .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 20px; }
-    @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } }
-    label { font-size: 0.85rem; color: var(--text-muted); font-family: 'JetBrains Mono'; }
+    @media (max-width: 640px) { .form-grid { grid-template-columns: 1fr; } }
+    label { font-size: 0.8rem; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
+
+    /* Alerta customizado */
+    .toast {
+      position: fixed; bottom: 24px; right: 24px; z-index: 999;
+      padding: 14px 20px; border-radius: 12px; font-size: 0.9rem; font-weight: 500;
+      background: rgba(15, 23, 42, 0.95); border: 1px solid var(--accent); color: var(--text);
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.6);
+      transform: translateY(120%); opacity: 0; transition: all 0.3s ease;
+    }
+    .toast.is-visible { transform: translateY(0); opacity: 1; }
   </style>
 </head>
 <body>
 
-  <!-- TELA DE LOGIN -->
+  <!-- TELA DE LOGIN DO PROPRIETÁRIO -->
   <div id="loginScreen" class="admin-container">
-    <div class="login-box glass-panel">
-      <span class="eyebrow">Acesso Restrito</span>
-      <h2 style="margin-bottom: 24px;">Painel de Controlo</h2>
-      <input type="password" id="adminPassword" placeholder="Insira a chave de acesso (ADMIN_SECRET)..." />
-      <button class="btn btn--primary" style="width: 100%;" onclick="login()">Autenticar</button>
-      <p id="loginError" style="color: #ef4444; font-size: 0.85rem; margin-top: 14px; display: none;">Chave incorreta.</p>
-    </div>
+    <form class="login-box glass-panel" onsubmit="handleLogin(event)">
+      <span class="eyebrow">SYS // OWNER ACCESS</span>
+      <h2>Painel Administrativo</h2>
+      <p>Área restrita para gerenciamento dos projetos no Neon PostgreSQL.</p>
+      <input type="password" id="adminPassword" placeholder="Chave mestra (ADMIN_SECRET)..." required autocomplete="current-password" />
+      <button type="submit" class="btn btn--primary" style="width: 100%;" id="loginBtn">Entrar no Painel</button>
+      <a href="./index.html" class="btn btn--ghost" style="width: 100%; margin-top: 10px;">← Voltar ao Portfólio</a>
+      <p id="loginError" style="color: #ef4444; font-size: 0.85rem; margin-top: 14px; display: none;">Chave incorreta ou servidor offline.</p>
+    </form>
   </div>
 
   <!-- DASHBOARD -->
   <div id="dashboard" class="admin-container">
     <div class="header-flex">
       <div>
-        <span class="eyebrow">SYS // ADMIN</span>
-        <h2>Gestão de Portfólio</h2>
+        <span class="eyebrow">SYS // TARCYO.DEV · NEON DB</span>
+        <h2>Gerenciamento de Projetos</h2>
       </div>
-      <button class="btn btn--ghost" onclick="logout()">Sair</button>
+      <div class="header-actions">
+        <a href="./index.html" class="btn btn--ghost">Ver Site ↗</a>
+        <button type="button" class="btn btn--ghost" onclick="logout()">Sair</button>
+      </div>
     </div>
 
-    <!-- Lista de Projetos -->
+    <!-- LISTA DE PROJETOS -->
     <div class="glass-panel">
-      <div class="header-flex" style="margin-bottom: 10px;">
-        <h3>Projetos Publicados</h3>
-        <button class="btn btn--primary" onclick="openForm()">+ Novo Projeto</button>
+      <div class="header-flex" style="margin-bottom: 12px;">
+        <h3>Projetos Cadastrados</h3>
+        <button type="button" class="btn btn--primary" onclick="openForm()">+ Novo Projeto</button>
       </div>
       <div id="projectsList">
-        <p style="color: var(--text-muted); font-size: 0.9rem;">A carregar dados do Neon...</p>
+        <p style="color: var(--text-muted); font-size: 0.9rem;">Carregando dados do Neon PostgreSQL...</p>
       </div>
     </div>
 
-    <!-- Formulário de Criação/Edição -->
+    <!-- FORMULÁRIO DE CRIAÇÃO / EDIÇÃO -->
     <div class="glass-panel" id="projectFormPanel" style="display: none;">
-      <h3 id="formTitle" style="margin-bottom: 20px;">Editar Projeto</h3>
+      <h3 id="formTitle" style="margin-bottom: 20px;">Novo Projeto</h3>
       <form id="projectForm" onsubmit="saveProject(event)">
         <div class="form-grid">
           <div>
-            <label>ID Único (ex: huby-app)</label>
-            <input type="text" id="f_id" required />
+            <label>ID Único (slug, ex: huby-mobilidade)</label>
+            <input type="text" id="f_id" required placeholder="ex: compreja" />
           </div>
           <div>
-            <label>Nome do Projeto (ex: HUBy)</label>
-            <input type="text" id="f_name" required />
+            <label>Nome do Projeto</label>
+            <input type="text" id="f_name" required placeholder="ex: CompreJá" />
           </div>
           <div>
-            <label>Filtro (mobile, web, interativo)</label>
-            <input type="text" id="f_category" required />
+            <label>Categoria de Filtro</label>
+            <select id="f_category" required>
+              <option value="mobile">Mobile</option>
+              <option value="web">Web & E-commerce</option>
+              <option value="interativo">Interativos</option>
+            </select>
           </div>
           <div>
-            <label>Etiqueta (ex: Mobile)</label>
-            <input type="text" id="f_category_label" required />
+            <label>Etiqueta Exibida no Card</label>
+            <input type="text" id="f_category_label" required placeholder="ex: Mobile / Web & E-commerce" />
           </div>
           <div>
-            <label>Status (ex: Em desenvolvimento)</label>
-            <input type="text" id="f_status" required />
+            <label>Status Atual</label>
+            <input type="text" id="f_status" required placeholder="ex: Publicado / Ativo" />
           </div>
           <div>
-            <label>Link Externo (URL ou vazio)</label>
-            <input type="text" id="f_demo_url" />
+            <label>Ordem de Exibição (0 = primeiro)</label>
+            <input type="number" id="f_order" value="0" min="0" />
           </div>
         </div>
 
-        <label>Resumo Curto</label>
-        <textarea id="f_summary" rows="2" required></textarea>
+        <label>Link do Projeto (Opcional)</label>
+        <input type="text" id="f_demo_url" placeholder="https://..." />
 
-        <label>Destaques (Separados por vírgula)</label>
-        <textarea id="f_highlights" rows="2" required placeholder="Integração PIX, Painel Admin, Geolocalização"></textarea>
+        <label>Resumo do Projeto</label>
+        <textarea id="f_summary" rows="2" required placeholder="Descrição objetiva do sistema..."></textarea>
 
-        <label>Tags de Tecnologia (Separadas por vírgula)</label>
-        <input type="text" id="f_tags" required placeholder="React Native, Node.js, Neon" />
+        <label>Destaques Técnicos (separados por vírgula)</label>
+        <textarea id="f_highlights" rows="2" required placeholder="Checkout PIX, Painel Admin, Banco Neon PostgreSQL"></textarea>
 
-        <div style="display: flex; gap: 14px; margin-top: 10px;">
-          <button type="submit" class="btn btn--primary" id="saveBtn">Guardar na Base de Dados</button>
+        <label>Tags de Tecnologia (separadas por vírgula)</label>
+        <input type="text" id="f_tags" required placeholder="React Native, TypeScript, Neon PostgreSQL" />
+
+        <div style="display: flex; gap: 12px; margin-top: 8px; flex-wrap: wrap;">
+          <button type="submit" class="btn btn--primary" id="saveBtn">Salvar no Banco</button>
           <button type="button" class="btn btn--ghost" onclick="closeForm()">Cancelar</button>
         </div>
       </form>
     </div>
   </div>
 
+  <div class="toast" id="toastBox"></div>
+
   <script>
-    const API_URL = 'http://localhost:3000/api/projects';
-    let adminToken = sessionStorage.getItem('adminToken') || '';
+    const isLocalHost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+    const API_URL = (isLocalHost && window.location.port !== '3000')
+      ? 'http://localhost:3000/api/projects'
+      : '/api/projects';
+
+    let adminToken = sessionStorage.getItem('tarcyo_admin_token') || '';
     let projectsData = [];
     let isEditing = false;
 
-    if (adminToken) showDashboard();
+    function showToast(message) {
+      const toast = document.getElementById('toastBox');
+      toast.textContent = message;
+      toast.classList.add('is-visible');
+      setTimeout(() => toast.classList.remove('is-visible'), 3200);
+    }
 
-    function login() {
-      const pass = document.getElementById('adminPassword').value;
-      if (!pass) return;
-      adminToken = pass;
-      sessionStorage.setItem('adminToken', adminToken);
-      document.getElementById('loginError').style.display = 'none';
+    if (adminToken) {
       showDashboard();
     }
 
+    async function handleLogin(e) {
+      e.preventDefault();
+      const pass = document.getElementById('adminPassword').value.trim();
+      const loginBtn = document.getElementById('loginBtn');
+      const errorEl = document.getElementById('loginError');
+      if (!pass) return;
+
+      loginBtn.textContent = 'Verificando...';
+      loginBtn.disabled = true;
+      errorEl.style.display = 'none';
+
+      try {
+        // Testa a chave fazendo uma verificação leve no servidor
+        const check = await fetch(API_URL, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${pass}`
+          },
+          body: JSON.stringify({})
+        });
+
+        if (check.status === 401) {
+          throw new Error('Chave incorreta.');
+        }
+
+        adminToken = pass;
+        sessionStorage.setItem('tarcyo_admin_token', adminToken);
+        await showDashboard();
+        showToast('Acesso autorizado.');
+      } catch (err) {
+        errorEl.textContent = err.message === 'Chave incorreta.'
+          ? 'Chave de acesso incorreta.'
+          : 'Servidor offline. Rode "node server.js" no terminal.';
+        errorEl.style.display = 'block';
+      } finally {
+        loginBtn.textContent = 'Entrar no Painel';
+        loginBtn.disabled = false;
+      }
+    }
+
     function logout() {
-      sessionStorage.removeItem('adminToken');
+      sessionStorage.removeItem('tarcyo_admin_token');
       adminToken = '';
       document.getElementById('dashboard').style.display = 'none';
       document.getElementById('loginScreen').style.display = 'flex';
+      document.getElementById('adminPassword').value = '';
     }
 
     async function showDashboard() {
@@ -155,29 +241,32 @@
     async function loadProjects() {
       try {
         const res = await fetch(API_URL);
-        if (!res.ok) throw new Error('Falha ao ler dados');
+        if (!res.ok) throw new Error('Falha ao ler dados.');
         const data = await res.json();
         projectsData = data.projects || [];
         renderList();
       } catch (err) {
-        document.getElementById('projectsList').innerHTML = `<p style="color:#ef4444;">Erro de ligação: Verifica se o 'node server.js' está a correr.</p>`;
+        document.getElementById('projectsList').innerHTML =
+          `<p style="color:#ef4444;">Erro de conexão: verifique se o "node server.js" está rodando.</p>`;
       }
     }
 
     function renderList() {
       const listEl = document.getElementById('projectsList');
       if (projectsData.length === 0) {
-        listEl.innerHTML = '<p style="color: var(--text-muted);">Nenhum projeto encontrado. Adiciona o primeiro!</p>';
+        listEl.innerHTML = '<p style="color: var(--text-muted);">Nenhum projeto no banco ainda. Clique em "+ Novo Projeto" para cadastrar.</p>';
         return;
       }
-      listEl.innerHTML = projectsData.map(p => `
+
+      listEl.innerHTML = projectsData.map((p) => `
         <div class="project-list-item">
           <div>
-            <strong>${p.name}</strong> <span style="color: var(--text-muted); font-size: 0.8rem;">— ${p.category_label}</span>
+            <strong>${p.name}</strong>
+            <span class="project-meta">${p.category_label || p.category} · ${p.status} · Ordem #${p.order_index ?? 0}</span>
           </div>
           <div class="project-actions">
-            <button onclick="editProject('${p.id}')">Editar</button>
-            <button class="btn-delete" onclick="deleteProject('${p.id}')">Remover</button>
+            <button type="button" class="action-btn" onclick="editProject('${p.id}')">Editar</button>
+            <button type="button" class="action-btn action-btn--danger" onclick="deleteProject('${p.id}')">Excluir</button>
           </div>
         </div>
       `).join('');
@@ -185,18 +274,21 @@
 
     function openForm(project = null) {
       document.getElementById('projectFormPanel').style.display = 'block';
-      isEditing = !!project;
-      document.getElementById('formTitle').textContent = isEditing ? 'Editar Projeto' : 'Novo Projeto';
+      isEditing = Boolean(project);
+
+      document.getElementById('formTitle').textContent = isEditing ? `Editando: ${project.name}` : 'Novo Projeto';
       document.getElementById('f_id').value = project ? project.id : '';
-      document.getElementById('f_id').disabled = isEditing; 
+      document.getElementById('f_id').disabled = isEditing;
       document.getElementById('f_name').value = project ? project.name : '';
-      document.getElementById('f_category').value = project ? project.category : '';
-      document.getElementById('f_category_label').value = project ? project.category_label : '';
-      document.getElementById('f_status').value = project ? project.status : '';
+      document.getElementById('f_category').value = project ? project.category : 'mobile';
+      document.getElementById('f_category_label').value = project ? (project.category_label || '') : 'Mobile';
+      document.getElementById('f_status').value = project ? project.status : 'Em produção';
+      document.getElementById('f_order').value = project ? (project.order_index ?? 0) : projectsData.length;
       document.getElementById('f_demo_url').value = project ? (project.demo_url || '') : '';
       document.getElementById('f_summary').value = project ? project.summary : '';
-      document.getElementById('f_highlights').value = project && project.highlights ? project.highlights.join(', ') : '';
-      document.getElementById('f_tags').value = project && project.tags ? project.tags.join(', ') : '';
+      document.getElementById('f_highlights').value = project && Array.isArray(project.highlights) ? project.highlights.join(', ') : '';
+      document.getElementById('f_tags').value = project && Array.isArray(project.tags) ? project.tags.join(', ') : '';
+
       document.getElementById('projectFormPanel').scrollIntoView({ behavior: 'smooth' });
     }
 
@@ -206,63 +298,81 @@
     }
 
     function editProject(id) {
-      const p = projectsData.find(item => item.id === id);
+      const p = projectsData.find((item) => item.id === id);
       if (p) openForm(p);
     }
 
     async function saveProject(e) {
       e.preventDefault();
       const btn = document.getElementById('saveBtn');
-      btn.textContent = 'A guardar...';
+      btn.textContent = 'Salvando...';
       btn.disabled = true;
 
       const payload = {
-        id: document.getElementById('f_id').value,
-        name: document.getElementById('f_name').value,
+        id: document.getElementById('f_id').value.trim(),
+        name: document.getElementById('f_name').value.trim(),
         category: document.getElementById('f_category').value,
-        category_label: document.getElementById('f_category_label').value,
-        status: document.getElementById('f_status').value,
+        category_label: document.getElementById('f_category_label').value.trim(),
+        status: document.getElementById('f_status').value.trim(),
+        order_index: Number(document.getElementById('f_order').value) || 0,
         visible: true,
-        demo_url: document.getElementById('f_demo_url').value,
-        summary: document.getElementById('f_summary').value,
-        highlights: document.getElementById('f_highlights').value.split(',').map(s => s.trim()).filter(Boolean),
-        tags: document.getElementById('f_tags').value.split(',').map(s => s.trim()).filter(Boolean)
+        demo_url: document.getElementById('f_demo_url').value.trim(),
+        summary: document.getElementById('f_summary').value.trim(),
+        highlights: document.getElementById('f_highlights').value.split(',').map((s) => s.trim()).filter(Boolean),
+        tags: document.getElementById('f_tags').value.split(',').map((s) => s.trim()).filter(Boolean)
       };
 
       try {
         const res = await fetch(API_URL, {
           method: isEditing ? 'PUT' : 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${adminToken}`
+          },
           body: JSON.stringify(payload)
         });
 
         if (res.status === 401) {
           logout();
-          alert('Sessão expirada ou chave incorreta.');
+          showToast('Sessão expirada. Faça login novamente.');
           return;
         }
+
+        if (!res.ok) throw new Error('Erro ao salvar no banco.');
+
         await loadProjects();
         closeForm();
+        showToast(isEditing ? 'Projeto atualizado no Neon!' : 'Projeto publicado no Neon!');
       } catch (err) {
-        alert('Erro ao guardar: ' + err.message);
+        showToast(err.message);
       } finally {
-        btn.textContent = 'Guardar na Base de Dados';
+        btn.textContent = 'Salvar no Banco';
         btn.disabled = false;
       }
     }
 
     async function deleteProject(id) {
       if (!confirm(`Remover o projeto "${id}" definitivamente?`)) return;
+
       try {
         const res = await fetch(API_URL, {
           method: 'DELETE',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${adminToken}`
+          },
           body: JSON.stringify({ deleteId: id })
         });
-        if (res.status === 401) { logout(); return; }
+
+        if (res.status === 401) {
+          logout();
+          return;
+        }
+
         await loadProjects();
+        showToast('Projeto removido.');
       } catch (err) {
-        alert('Erro ao remover: ' + err.message);
+        showToast('Erro ao remover projeto.');
       }
     }
   </script>

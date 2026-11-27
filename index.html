@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Tarcyo Carvalho — Portfolio 3D · Mobile & Web</title>
+  <title>Portfólio — Tarcyo Carvalho</title>
   <link rel="icon" href="data:," />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -15,36 +15,27 @@
   <link rel="stylesheet" href="./css/modal.css" />
 </head>
 <body>
-  <!-- PALCO 3D FIXO DE FUNDO -->
+  <!-- PALCO 3D (APENAS KUNAI, FUMAÇA E ESTILHAÇOS) -->
   <canvas id="webglScene" aria-hidden="true"></canvas>
   <div class="vignette-overlay" aria-hidden="true"></div>
-  <div class="noise-overlay" aria-hidden="true"></div>
 
-  <!-- HUD ESTILO IGLOO NOS CANTOS -->
-  <div class="hud-frame" aria-hidden="true">
-    <div class="hud-corner hud-corner--tl">
-      <span class="hud-label">SYS // TARCYO.DEV</span>
-      <span class="hud-sub" id="hudSectionLabel">01 · OVERVIEW</span>
-    </div>
-
-    <div class="hud-corner hud-corner--tr">
-      <span class="hud-label">LOC · PIAUÍ, BR</span>
-      <span class="hud-sub" id="hudCoords">Z: 0.00 · 60FPS</span>
-    </div>
-
-    <div class="hud-corner hud-corner--bl">
-      <div class="hud-progress-track">
-        <div class="hud-progress-bar" id="scrollProgress"></div>
-      </div>
-      <span class="hud-sub" id="hudPercent">SCROLL 00%</span>
-    </div>
-
-    <div class="hud-corner hud-corner--br">
-      <span class="hud-sub">ARRASTE OU ROLE</span>
+  <!-- TELA INICIAL CINEMATOGRÁFICA (KUNAI + FUMAÇA + NOME) -->
+  <div class="intro-splash" id="introSplash" aria-hidden="true">
+    <div class="intro-splash__smoke"></div>
+    <div class="intro-splash__slash"></div>
+    <div class="intro-splash__content">
+      <span class="intro-splash__tag">ENGENHARIA MOBILE &amp; WEB</span>
+      <h2 class="intro-splash__title">PORTFÓLIO</h2>
+      <p class="intro-splash__name">TARCYO CARVALHO</p>
     </div>
   </div>
 
-  <!-- NAVEGAÇÃO SUPERIOR -->
+  <!-- BARRA DE PROGRESSO SUPERIOR DISCRETA -->
+  <div class="top-progress" aria-hidden="true">
+    <div class="top-progress__bar" id="scrollProgress"></div>
+  </div>
+
+  <!-- NAVEGAÇÃO SUPERIOR LIMPA -->
   <header class="topbar" id="topbar">
     <div class="container topbar__inner">
       <a href="#hero" class="brand">
@@ -61,20 +52,19 @@
     </div>
   </header>
 
-  <!-- CONTEÚDO GUIADO POR SCROLL -->
+  <!-- CONTEÚDO PRINCIPAL -->
   <main id="smoothContent">
-    <!-- SEÇÃO 01: HERO + RETRATO SHARINGAN -->
-    <section class="story-section hero" id="hero" data-scene-stage="0" data-stage-name="01 · OVERVIEW">
+    <!-- SEÇÃO 01: HERO + RETRATO QUE QUEBRA NO IMPACTO DA KUNAI -->
+    <section class="story-section hero" id="hero">
       <div class="container hero__grid">
-        <div class="hero__content glass-panel" data-parallax="0.04">
+        <div class="hero__content glass-panel">
           <div class="eyebrow-row">
             <span class="status-pill"><span class="pulse"></span> DISPONÍVEL PARA PROJETOS</span>
-            <span class="mono-tag">BUILD v2.6</span>
           </div>
 
           <h1 class="hero__title">
             Tarcyo Carvalho
-            <span>Engenharia Mobile & Sistemas Web de Alta Performance.</span>
+            <span>Engenharia Mobile &amp; Sistemas Web de Alta Performance.</span>
           </h1>
 
           <p class="hero__bio" id="heroBioText">
@@ -90,79 +80,59 @@
           <div class="hero__metrics">
             <div class="metric">
               <strong>06+</strong>
-              <span>Sistemas & Apps Reais</span>
+              <span>Sistemas &amp; Apps Reais</span>
             </div>
             <div class="metric">
               <strong>FULL-STACK</strong>
-              <span>Mobile, Web, APIs & PIX</span>
+              <span>Mobile, Web, APIs &amp; PIX</span>
             </div>
             <div class="metric">
               <strong>60 FPS</strong>
-              <span>WebGL & UI Responsiva</span>
+              <span>WebGL &amp; UI Responsiva</span>
             </div>
           </div>
         </div>
 
-        <!-- RETRATO INTERATIVO COM SHARINGAN -->
-        <div class="hero__visual" data-parallax="-0.12">
+        <!-- RETRATO COM EFEITO DE VIDRO QUEBRANDO AO ROLAR -->
+        <div class="hero__visual">
           <div class="portrait-card" id="portraitCard">
             <div class="portrait-card__halo"></div>
-            <div class="portrait-frame">
+            <div class="portrait-frame" id="portraitFrame">
               <img
                 src="./assets/img/avatar-tarcyo.jpg"
-                alt="Tarcyo Carvalho com efeito Sharingan animado"
+                alt="Tarcyo Carvalho"
                 class="portrait-frame__img"
               />
 
-              <div class="sharingan-layer" aria-hidden="true">
-                <div class="sharingan-eye sharingan-eye--left">
-                  <svg class="sharingan-svg" viewBox="0 0 100 100">
-                    <circle cx="50" cy="50" r="46" fill="#dc2626" stroke="#180505" stroke-width="5" />
-                    <circle cx="50" cy="50" r="24" fill="none" stroke="#140404" stroke-width="2.5" opacity="0.65" />
-                    <g class="sharingan-tomoe">
-                      <g transform="translate(50 26)">
-                        <circle cx="0" cy="0" r="6.2" fill="#111111" />
-                        <path d="M -5.2 -2.2 C -11 1.5, -10 8.5, -3.2 10.5 C -6.5 7.2, -5.8 2.8, -1.2 1.2 Z" fill="#111111" />
-                      </g>
-                      <g transform="translate(70.8 62)">
-                        <circle cx="0" cy="0" r="6.2" fill="#111111" />
-                        <path d="M 3.5 -4.8 C 9.8 -3.8, 12.2 2.8, 7.6 7.8 C 8.8 3.4, 6.2 0.2, 1.8 0.8 Z" fill="#111111" />
-                      </g>
-                      <g transform="translate(29.2 62)">
-                        <circle cx="0" cy="0" r="6.2" fill="#111111" />
-                        <path d="M 1.8 5.8 C -2.8 10.4, -9.8 9.2, -10.8 2.6 C -8.2 6.2, -3.8 5.8, -1.2 2.4 Z" fill="#111111" />
-                      </g>
-                    </g>
-                    <circle cx="50" cy="50" r="8.5" fill="#09090b" />
-                  </svg>
-                </div>
+              <!-- FLASH DE IMPACTO DA KUNAI -->
+              <div class="impact-flash" id="impactFlash" aria-hidden="true"></div>
 
-                <div class="sharingan-eye sharingan-eye--right">
-                  <svg class="sharingan-svg" viewBox="0 0 100 100">
-                    <circle cx="50" cy="50" r="46" fill="#dc2626" stroke="#180505" stroke-width="5" />
-                    <circle cx="50" cy="50" r="24" fill="none" stroke="#140404" stroke-width="2.5" opacity="0.65" />
-                    <g class="sharingan-tomoe">
-                      <g transform="translate(50 26)">
-                        <circle cx="0" cy="0" r="6.2" fill="#111111" />
-                        <path d="M -5.2 -2.2 C -11 1.5, -10 8.5, -3.2 10.5 C -6.5 7.2, -5.8 2.8, -1.2 1.2 Z" fill="#111111" />
-                      </g>
-                      <g transform="translate(70.8 62)">
-                        <circle cx="0" cy="0" r="6.2" fill="#111111" />
-                        <path d="M 3.5 -4.8 C 9.8 -3.8, 12.2 2.8, 7.6 7.8 C 8.8 3.4, 6.2 0.2, 1.8 0.8 Z" fill="#111111" />
-                      </g>
-                      <g transform="translate(29.2 62)">
-                        <circle cx="0" cy="0" r="6.2" fill="#111111" />
-                        <path d="M 1.8 5.8 C -2.8 10.4, -9.8 9.2, -10.8 2.6 C -8.2 6.2, -3.8 5.8, -1.2 2.4 Z" fill="#111111" />
-                      </g>
-                    </g>
-                    <circle cx="50" cy="50" r="8.5" fill="#09090b" />
-                  </svg>
-                </div>
-              </div>
+              <!-- RACHADURAS DE VIDRO QUE APARECEM QUANDO A KUNAI ATINGE -->
+              <svg class="shatter-overlay" id="shatterOverlay" viewBox="0 0 400 500" preserveAspectRatio="none" aria-hidden="true">
+                <!-- Ponto de impacto no centro -->
+                <circle cx="205" cy="245" r="7" fill="rgba(255,255,255,0.85)" />
+                <circle cx="205" cy="245" r="24" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="1.5" />
+                <circle cx="205" cy="245" r="56" fill="none" stroke="rgba(255,255,255,0.28)" stroke-width="1" />
+
+                <!-- Trincas radiais principais -->
+                <path d="M205 245 L140 165 L75 80 L15 12" />
+                <path d="M205 245 L265 150 L335 65 L392 8" />
+                <path d="M205 245 L295 225 L365 205 L400 198" />
+                <path d="M205 245 L285 320 L345 415 L390 492" />
+                <path d="M205 245 L195 350 L185 435 L178 500" />
+                <path d="M205 245 L115 310 L48 395 L6 475" />
+                <path d="M205 245 L105 235 L32 220 L0 212" />
+                <path d="M205 245 L210 130 L218 45 L222 0" />
+
+                <!-- Estilhaços transversais (teia de vidro quebrado) -->
+                <path d="M140 165 L210 130 L265 150 L295 225 L285 320 L195 350 L115 310 L105 235 Z" />
+                <path d="M75 80 L218 45 L335 65 L365 205 L345 415 L185 435 L48 395 L32 220 Z" />
+                <path d="M140 165 L105 235 M265 150 L210 130 M285 320 L295 225 M115 310 L195 350" />
+              </svg>
 
               <div class="portrait-frame__caption">
                 <span class="status-dot"></span>
-                <span>SHARINGAN · VISUAL OVERRIDE</span>
+                <span>TARCYO CARVALHO · DEV</span>
               </div>
             </div>
           </div>
@@ -171,18 +141,18 @@
     </section>
 
     <!-- SEÇÃO 02: PROJETOS -->
-    <section class="story-section" id="projetos" data-scene-stage="1" data-stage-name="02 · PROJETOS">
+    <section class="story-section" id="projetos">
       <div class="container">
-        <div class="section__header glass-panel" data-parallax="-0.05">
+        <div class="section__header glass-panel">
           <div>
             <span class="eyebrow">02 // PORTFÓLIO SELECIONADO</span>
-            <h2>Aplicações & Plataformas em Produção</h2>
+            <h2>Aplicações &amp; Plataformas em Produção</h2>
           </div>
 
           <div class="filters" role="tablist" aria-label="Filtrar projetos">
             <button class="filter-btn is-active" data-filter="all" type="button">Todos</button>
             <button class="filter-btn" data-filter="mobile" type="button">Mobile</button>
-            <button class="filter-btn" data-filter="web" type="button">Web & E-commerce</button>
+            <button class="filter-btn" data-filter="web" type="button">Web &amp; E-commerce</button>
             <button class="filter-btn" data-filter="interativo" type="button">Interativos</button>
           </div>
         </div>
@@ -192,17 +162,17 @@
     </section>
 
     <!-- SEÇÃO 03: STACK & ARQUITETURA -->
-    <section class="story-section" id="stack" data-scene-stage="2" data-stage-name="03 · ARQUITETURA">
+    <section class="story-section" id="stack">
       <div class="container">
-        <div class="section__header glass-panel" data-parallax="-0.05">
+        <div class="section__header glass-panel">
           <div>
-            <span class="eyebrow">03 // INFRAESTRUTURA & STACK</span>
+            <span class="eyebrow">03 // INFRAESTRUTURA &amp; STACK</span>
             <h2>Arquitetura desenhada para escalar</h2>
           </div>
         </div>
 
         <div class="stack-grid">
-          <article class="stack-card glass-panel" data-parallax="-0.03">
+          <article class="stack-card glass-panel">
             <span class="mono-index">[01]</span>
             <h3>Mobile Multiplataforma</h3>
             <p>Apps nativos com foco em fluidez, testes em campo via APK, geolocalização e assistentes de voz.</p>
@@ -214,9 +184,9 @@
             </div>
           </article>
 
-          <article class="stack-card glass-panel" data-parallax="-0.06">
+          <article class="stack-card glass-panel">
             <span class="mono-index">[02]</span>
-            <h3>Web Full-Stack & Pagamentos</h3>
+            <h3>Web Full-Stack &amp; Pagamentos</h3>
             <p>Lojas virtuais, painéis administrativos, checkouts com validação server-side e banco serverless.</p>
             <div class="tags">
               <span>HTML5 / CSS3 / JS</span>
@@ -226,9 +196,9 @@
             </div>
           </article>
 
-          <article class="stack-card glass-panel" data-parallax="-0.03">
+          <article class="stack-card glass-panel">
             <span class="mono-index">[03]</span>
-            <h3>Experiências Interativas & CMS</h3>
+            <h3>Experiências Interativas &amp; CMS</h3>
             <p>Sistemas sob medida com persistência dinâmica, animações 60 FPS e controle total pelo cliente.</p>
             <div class="tags">
               <span>Three.js / WebGL</span>
@@ -242,9 +212,9 @@
     </section>
 
     <!-- SEÇÃO 04: CONTATO -->
-    <section class="story-section" id="contato" data-scene-stage="3" data-stage-name="04 · CONTATO">
+    <section class="story-section" id="contato">
       <div class="container">
-        <div class="contact-box glass-panel" data-parallax="-0.04">
+        <div class="contact-box glass-panel">
           <div>
             <span class="eyebrow">04 // CONEXÃO DIRETA</span>
             <h2>Pronto para construir seu próximo aplicativo ou sistema web?</h2>
@@ -265,7 +235,7 @@
   <footer class="footer">
     <div class="container footer__inner">
       <span>© <span id="year"></span> Tarcyo Carvalho de Sousa</span>
-      <span>Arquitetura Modular · Pronta para Painel Admin</span>
+      <span>Engenharia Mobile &amp; Sistemas Web</span>
     </div>
   </footer>
 

@@ -2,22 +2,35 @@
   const data = await window.PortfolioStore.load();
   const projects = (data.projects || []).filter((p) => p.visible !== false);
 
+  const introSplash = document.getElementById('introSplash');
+  const portraitCard = document.getElementById('portraitCard');
+  const portraitFrame = document.getElementById('portraitFrame');
+  const brandTrigger = document.querySelector('.brand');
+
   const projectsGrid = document.getElementById('projectsGrid');
   const filterButtons = document.querySelectorAll('.filter-btn');
   const modal = document.getElementById('projectModal');
   const closeModalBtn = document.getElementById('closeModalBtn');
   const topbarEl = document.getElementById('topbar');
   const progressBarEl = document.getElementById('scrollProgress');
-
-  const hudPercentEl = document.getElementById('hudPercent');
-  const hudCoordsEl = document.getElementById('hudCoords');
-  const hudSectionLabelEl = document.getElementById('hudSectionLabel');
-
-  const portraitCard = document.getElementById('portraitCard');
-  const brandTrigger = document.querySelector('.brand');
   const yearEl = document.getElementById('year');
 
   if (yearEl) yearEl.textContent = new Date().getFullYear();
+
+  // 1. CONTROLE DA TELA INICIAL (KUNAI + FUMAÇA -> REVELA O PORTFÓLIO)
+  if (introSplash) {
+    // Permite pular a intro clicando nela ou aguarda 2.4s automaticamente
+    const closeIntro = () => {
+      if (introSplash.classList.contains('is-hidden')) return;
+      introSplash.classList.add('is-hidden');
+      window.SceneController?.finishIntro();
+    };
+
+    introSplash.addEventListener('click', closeIntro);
+    setTimeout(closeIntro, 2400);
+  } else {
+    window.SceneController?.finishIntro();
+  }
 
   // SEGURANÇA ANTI-XSS
   function escapeHTML(str) {
@@ -57,7 +70,7 @@
   portraitCard?.addEventListener('click', registerOwnerTap);
   brandTrigger?.addEventListener('click', registerOwnerTap);
 
-  // FÁBRICA DE CARDS
+  // RENDERIZAÇÃO DOS PROJETOS
   function createProjectCard(project) {
     const safeId = escapeHTML(project.id);
     const safeUrl = getSafeUrl(project.demoUrl);
@@ -170,78 +183,56 @@
     }
   });
 
-  // EFEITO 3D DO RETRATO NO HOVER (Desktop)
-  if (portraitCard && window.matchMedia('(pointer: fine)').matches) {
-    portraitCard.addEventListener('mousemove', (e) => {
-      const rect = portraitCard.getBoundingClientRect();
-      const nx = (e.clientX - rect.left) / rect.width - 0.5;
-      const ny = (e.clientY - rect.top) / rect.height - 0.5;
-      portraitCard.style.transform = `perspective(900px) rotateY(${(nx * 12).toFixed(1)}deg) rotateX(${(-ny * 12).toFixed(1)}deg)`;
-    });
-    portraitCard.addEventListener('mouseleave', () => {
-      portraitCard.style.transform = 'perspective(900px) rotateY(0deg) rotateX(0deg)';
-    });
-  }
-
-  // MOTOR DE PARALLAX & SCROLL OBSERVER (60 FPS)
+  // 2. LOOP DE SCROLL E IMPACTO DA KUNAI NA FOTO
   const sections = document.querySelectorAll('.story-section');
   const navLinks = document.querySelectorAll('.nav a');
-  const parallaxItems = document.querySelectorAll('[data-parallax]');
-  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const isDesktop = window.matchMedia('(min-width: 769px)').matches;
+  let ticking = false;
 
-  let currentScroll = window.scrollY || 0;
-  let targetScroll = currentScroll;
-
-  window.addEventListener('scroll', () => {
-    targetScroll = window.scrollY || window.pageYOffset;
-  }, { passive: true });
-
-  function renderScrollLoop() {
-    currentScroll += (targetScroll - currentScroll) * 0.1;
-
+  function onScrollUpdate() {
+    const scrollTop = window.scrollY || window.pageYOffset;
     const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-    const progress = maxScroll > 0 ? Math.min(Math.max(currentScroll / maxScroll, 0), 1) : 0;
+    const progress = maxScroll > 0 ? Math.min(Math.max(scrollTop / maxScroll, 0), 1) : 0;
 
-    if (topbarEl) topbarEl.classList.toggle('is-scrolled', currentScroll > 20);
+    if (topbarEl) topbarEl.classList.toggle('is-scrolled', scrollTop > 20);
     if (progressBarEl) progressBarEl.style.transform = `scaleX(${progress})`;
-    if (hudPercentEl) hudPercentEl.textContent = `SCROLL ${String(Math.round(progress * 100)).padStart(2, '0')}%`;
-    if (hudCoordsEl) hudCoordsEl.textContent = `Z: ${(progress * 10).toFixed(2)} · 60FPS`;
 
-    if (window.SceneController) {
-      window.SceneController.setScrollProgress(progress);
+    window.SceneController?.setScrollProgress(progress);
+
+    // Quando você começa a descer (passando de 5% do scroll), a Kunai atinge e quebra a foto!
+    if (progress >= 0.05 && portraitFrame) {
+      if (!portraitFrame.classList.contains('is-shattered')) {
+        portraitFrame.classList.add('is-shattered');
+        window.SceneController?.triggerPortraitImpact();
+      }
+    } else if (progress < 0.02 && portraitFrame) {
+      // Se voltar totalmente para o topo, restaura o vidro para quebrar de novo quando descer
+      portraitFrame.classList.remove('is-shattered');
+      window.SceneController?.resetPortraitImpact();
     }
 
-    if (!prefersReducedMotion && isDesktop) {
-      const viewportCenter = currentScroll + window.innerHeight * 0.5;
-      parallaxItems.forEach((el) => {
-        const speed = parseFloat(el.dataset.parallax) || 0;
-        const rect = el.getBoundingClientRect();
-        const elCenter = currentScroll + rect.top + rect.height * 0.5;
-        const offset = (viewportCenter - elCenter) * speed;
-        el.style.transform = `translate3d(0, ${offset.toFixed(2)}px, 0)`;
-      });
-    }
-
-    const midViewport = currentScroll + window.innerHeight * 0.45;
+    const midViewport = scrollTop + window.innerHeight * 0.45;
     sections.forEach((sec) => {
       const top = sec.offsetTop;
       const height = sec.offsetHeight;
       if (midViewport >= top && midViewport < top + height) {
-        if (hudSectionLabelEl && sec.dataset.stageName) {
-          hudSectionLabelEl.textContent = sec.dataset.stageName;
-        }
         navLinks.forEach((link) => {
           link.classList.toggle('is-active', link.dataset.nav === sec.id);
         });
       }
     });
 
-    requestAnimationFrame(renderScrollLoop);
+    ticking = false;
   }
 
+  window.addEventListener('scroll', () => {
+    if (!ticking) {
+      requestAnimationFrame(onScrollUpdate);
+      ticking = true;
+    }
+  }, { passive: true });
+
   renderProjects('all');
-  requestAnimationFrame(renderScrollLoop);
+  onScrollUpdate();
 
   const initialUrlParams = new URLSearchParams(window.location.search);
   const initialProjectId = initialUrlParams.get('project');

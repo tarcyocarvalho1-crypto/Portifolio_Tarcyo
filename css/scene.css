@@ -1,11 +1,10 @@
-/* PALCO 3D FIXO + ATMOSFERA */
+/* PALCO 3D LIMPO (KUNAI + FUMAÇA + ESTILHAÇOS) */
 #webglScene {
   position: fixed;
   inset: 0;
   width: 100%;
   height: 100%;
-  z-index: 0;
-  display: block;
+  z-index: 2;
   pointer-events: none;
 }
 
@@ -14,294 +13,245 @@
   inset: 0;
   z-index: 1;
   pointer-events: none;
-  background:
-    radial-gradient(circle at 50% 45%, transparent 35%, rgba(5, 7, 12, 0.78) 100%),
-    linear-gradient(180deg, rgba(5, 7, 12, 0.45) 0%, transparent 22%, transparent 80%, rgba(5, 7, 12, 0.85) 100%);
+  background: radial-gradient(circle at 50% 35%, rgba(15, 23, 42, 0.15) 0%, rgba(5, 7, 12, 0.92) 85%);
 }
 
-.noise-overlay {
+/* BARRA DE PROGRESSO NO TOPO */
+.top-progress {
   position: fixed;
-  inset: 0;
-  z-index: 2;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  z-index: 60;
+  background: rgba(255, 255, 255, 0.05);
   pointer-events: none;
-  opacity: 0.035;
-  background-image: radial-gradient(#ffffff 0.75px, transparent 0.75px);
-  background-size: 18px 18px;
 }
 
-/* HUD ESTILO IGLOO */
-.hud-frame {
-  position: fixed;
-  inset: 0;
-  z-index: 40;
-  pointer-events: none;
-  font-family: 'JetBrains Mono', monospace;
-}
-
-.hud-corner {
-  position: fixed;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  font-size: 0.68rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: rgba(203, 213, 225, 0.72);
-}
-
-.hud-corner--tl {
-  top: 78px;
-  left: max(18px, 3vw);
-}
-
-.hud-corner--tr {
-  top: 78px;
-  right: max(18px, 3vw);
-  text-align: right;
-}
-
-.hud-corner--bl {
-  bottom: 18px;
-  left: max(18px, 3vw);
-}
-
-.hud-corner--br {
-  bottom: 18px;
-  right: max(18px, 3vw);
-  text-align: right;
-}
-
-.hud-label {
-  color: #f8fafc;
-  font-weight: 600;
-}
-
-.hud-sub {
-  color: #94a3b8;
-}
-
-.hud-progress-track {
-  width: 110px;
-  height: 3px;
-  background: rgba(148, 163, 184, 0.2);
-  border-radius: 99px;
-  overflow: hidden;
-  margin-bottom: 4px;
-}
-
-.hud-progress-bar {
+.top-progress__bar {
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, var(--accent), var(--indigo));
+  background: linear-gradient(90deg, #dc2626, #f87171);
   transform-origin: left center;
   transform: scaleX(0);
-  will-change: transform;
 }
 
-/* SEÇÕES STORYTELLING */
-main {
-  position: relative;
-  z-index: 10;
-}
-
-.story-section {
-  min-height: 100svh;
+/* ==========================================
+   TELA INICIAL CINEMATOGRÁFICA (INTRO SPLASH)
+   ========================================== */
+.intro-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
   display: flex;
   align-items: center;
-  padding: 112px 0 84px;
+  justify-content: center;
+  background: radial-gradient(circle at center, #0c101a 0%, #04060a 100%);
+  transition: opacity 0.85s cubic-bezier(0.22, 1, 0.36, 1), visibility 0.85s ease;
+  overflow: hidden;
 }
 
-.hero__grid {
-  display: grid;
-  grid-template-columns: 1.15fr 0.85fr;
-  gap: 40px;
-  align-items: center;
+.intro-splash.is-hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
 }
 
-.hero__content {
-  padding: 34px;
-  border-radius: var(--radius-lg);
-}
-
-.eyebrow-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  margin-bottom: 18px;
-}
-
-.status-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 5px 12px;
-  border-radius: 999px;
-  background: rgba(34, 197, 94, 0.1);
-  border: 1px solid rgba(34, 197, 94, 0.28);
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.72rem;
-  color: #86efac;
-}
-
-.status-pill .pulse {
-  width: 7px;
-  height: 7px;
+/* Fumaça volumétrica que surge no impacto da Kunai */
+.intro-splash__smoke {
+  position: absolute;
+  width: 520px;
+  height: 520px;
   border-radius: 50%;
-  background: #22c55e;
-  animation: pulseDot 2s infinite;
+  background: radial-gradient(
+    circle,
+    rgba(220, 38, 38, 0.22) 0%,
+    rgba(148, 163, 184, 0.14) 38%,
+    rgba(5, 7, 12, 0) 72%
+  );
+  filter: blur(28px);
+  transform: scale(0.2);
+  opacity: 0;
+  animation: smokeBurst 2.4s cubic-bezier(0.16, 1, 0.3, 1) 0.35s forwards;
 }
 
-.mono-tag {
+/* Rastro de corte metálico da Kunai */
+.intro-splash__slash {
+  position: absolute;
+  width: 140%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.9), #ef4444, transparent);
+  transform: rotate(-18deg) translateX(-120%);
+  opacity: 0;
+  animation: kunaiSlash 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.15s forwards;
+}
+
+.intro-splash__content {
+  position: relative;
+  z-index: 3;
+  text-align: center;
+  padding: 0 24px;
+}
+
+.intro-splash__tag {
+  display: inline-block;
   font-family: 'JetBrains Mono', monospace;
-  font-size: 0.72rem;
-  color: var(--text-muted);
+  font-size: 0.75rem;
+  letter-spacing: 0.28em;
+  color: #ef4444;
+  margin-bottom: 12px;
+  opacity: 0;
+  transform: translateY(10px);
+  animation: smokeTextReveal 0.8s ease 0.55s forwards;
 }
 
-.hero__title {
-  font-size: clamp(2.2rem, 4.6vw, 3.6rem);
+.intro-splash__title {
+  font-size: clamp(2.4rem, 7vw, 4.6rem);
   font-weight: 800;
-  line-height: 1.06;
-  letter-spacing: -0.03em;
-}
-
-.hero__title span {
-  display: block;
-  margin-top: 10px;
-  font-size: clamp(1.08rem, 2vw, 1.42rem);
-  font-weight: 500;
-  color: var(--text-muted);
-  letter-spacing: -0.01em;
-}
-
-.hero__bio {
-  margin-top: 18px;
-  font-size: 0.98rem;
-  color: #cbd5e1;
-}
-
-.hero__actions {
-  margin-top: 24px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-
-.hero__metrics {
-  margin-top: 28px;
-  padding-top: 20px;
-  border-top: 1px solid var(--border);
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
-}
-
-.metric strong {
-  display: block;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 1.05rem;
+  letter-spacing: 0.22em;
   color: #f8fafc;
+  text-shadow: 0 0 36px rgba(239, 68, 68, 0.35), 0 10px 30px rgba(0, 0, 0, 0.85);
+  margin: 0;
+  opacity: 0;
+  filter: blur(12px);
+  transform: scale(1.08);
+  animation: titleFromSmoke 1.1s cubic-bezier(0.16, 1, 0.3, 1) 0.45s forwards;
 }
 
-.metric span {
-  font-size: 0.78rem;
-  color: var(--text-muted);
+.intro-splash__name {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: clamp(0.95rem, 2.4vw, 1.25rem);
+  letter-spacing: 0.36em;
+  color: #cbd5e1;
+  margin-top: 14px;
+  opacity: 0;
+  filter: blur(8px);
+  animation: titleFromSmoke 1s cubic-bezier(0.16, 1, 0.3, 1) 0.75s forwards;
 }
 
-/* RETRATO 3D + SHARINGAN */
+@keyframes kunaiSlash {
+  0% { opacity: 0; transform: rotate(-18deg) translateX(-100%); }
+  40% { opacity: 1; }
+  100% { opacity: 0; transform: rotate(-18deg) translateX(100%); }
+}
+
+@keyframes smokeBurst {
+  0% { transform: scale(0.25); opacity: 0; }
+  35% { opacity: 0.95; }
+  100% { transform: scale(1.85); opacity: 0.35; }
+}
+
+@keyframes titleFromSmoke {
+  0% { opacity: 0; filter: blur(14px); transform: scale(1.08); }
+  100% { opacity: 1; filter: blur(0); transform: scale(1); }
+}
+
+@keyframes smokeTextReveal {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ==========================================
+   RETRATO E EFEITO DE VIDRO QUEBRANDO
+   ========================================== */
 .hero__visual {
-  display: grid;
-  place-items: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .portrait-card {
   position: relative;
-  transform-style: preserve-3d;
-  transition: transform 0.2s ease-out;
-  will-change: transform;
-}
-
-.portrait-card__halo {
-  position: absolute;
-  inset: -14px;
-  border-radius: 34px;
-  border: 1px solid rgba(239, 68, 68, 0.34);
-  background: radial-gradient(circle, rgba(239, 68, 68, 0.16), transparent 70%);
-  pointer-events: none;
-  animation: pulseHalo 4s ease-in-out infinite;
+  width: 100%;
+  max-width: 390px;
+  cursor: pointer;
+  transition: transform 0.25s ease-out;
 }
 
 .portrait-frame {
   position: relative;
-  width: min(350px, 82vw);
-  aspect-ratio: 3 / 4;
-  border-radius: 26px;
+  border-radius: 22px;
   overflow: hidden;
-  border: 1px solid rgba(239, 68, 68, 0.5);
-  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.72), 0 0 40px rgba(220, 38, 38, 0.22);
-  background: #0b101b;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: #090d16;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.75);
+  transition: border-color 0.35s ease, box-shadow 0.35s ease;
 }
 
 .portrait-frame__img {
   width: 100%;
-  height: 100%;
+  aspect-ratio: 4 / 5;
   object-fit: cover;
-  object-position: center 20%;
+  display: block;
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), filter 0.4s ease;
 }
 
-.sharingan-layer {
+/* Estado quebrado quando a Kunai atinge no scroll */
+.portrait-frame.is-shattered {
+  border-color: rgba(239, 68, 68, 0.65);
+  box-shadow: 0 0 42px rgba(239, 68, 68, 0.28), 0 25px 60px rgba(0, 0, 0, 0.85);
+  animation: impactShake 0.45s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+.portrait-frame.is-shattered .portrait-frame__img {
+  transform: scale(1.04);
+  filter: contrast(1.08) saturate(1.1);
+}
+
+.impact-flash {
   position: absolute;
   inset: 0;
+  background: radial-gradient(circle at 51% 49%, rgba(255, 255, 255, 0.95) 0%, rgba(239, 68, 68, 0.5) 35%, transparent 75%);
+  opacity: 0;
   pointer-events: none;
+  z-index: 4;
 }
 
-.sharingan-eye {
+.portrait-frame.is-shattered .impact-flash {
+  animation: flashBang 0.55s ease-out forwards;
+}
+
+.shatter-overlay {
   position: absolute;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  mix-blend-mode: screen;
-  filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.95));
-  animation: eyePulse 3.4s ease-in-out infinite;
-}
-
-.sharingan-eye--left {
-  top: 52.5%;
-  left: 36.8%;
-}
-
-.sharingan-eye--right {
-  top: 52.5%;
-  left: 53.8%;
-}
-
-.sharingan-svg {
+  inset: 0;
   width: 100%;
   height: 100%;
+  z-index: 5;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s ease;
 }
 
-.sharingan-tomoe {
-  transform-origin: 50px 50px;
-  animation: spinTomoe 5s linear infinite;
+.shatter-overlay path {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.78);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 4px rgba(239, 68, 68, 0.65));
+}
+
+.portrait-frame.is-shattered .shatter-overlay {
+  opacity: 1;
 }
 
 .portrait-frame__caption {
   position: absolute;
-  bottom: 12px;
-  left: 12px;
-  right: 12px;
+  left: 14px;
+  right: 14px;
+  bottom: 14px;
+  z-index: 6;
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 12px;
+  padding: 10px 14px;
   border-radius: 12px;
-  background: rgba(5, 7, 12, 0.82);
+  background: rgba(5, 7, 12, 0.78);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.08);
   font-family: 'JetBrains Mono', monospace;
   font-size: 0.72rem;
-  color: #fca5a5;
+  letter-spacing: 0.08em;
+  color: #e2e8f0;
 }
 
 .status-dot {
@@ -309,50 +259,18 @@ main {
   height: 7px;
   border-radius: 50%;
   background: #ef4444;
-  box-shadow: 0 0 8px #ef4444;
+  box-shadow: 0 0 10px #ef4444;
 }
 
-@keyframes spinTomoe {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+@keyframes impactShake {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
+  20% { transform: translate3d(-7px, 4px, 0) rotate(-1.2deg); }
+  40% { transform: translate3d(7px, -3px, 0) rotate(1.1deg); }
+  60% { transform: translate3d(-4px, 2px, 0) rotate(-0.6deg); }
+  80% { transform: translate3d(3px, -1px, 0) rotate(0.3deg); }
 }
 
-@keyframes eyePulse {
-  0%, 100% { transform: scale(0.95); opacity: 0.9; }
-  50% { transform: scale(1.08); opacity: 1; }
-}
-
-@keyframes pulseHalo {
-  0%, 100% { transform: scale(1); opacity: 0.6; }
-  50% { transform: scale(1.03); opacity: 1; }
-}
-
-@keyframes pulseDot {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.35; }
-}
-
-@media (max-width: 920px) {
-  .hero__grid {
-    grid-template-columns: 1fr;
-    gap: 28px;
-  }
-  .hero__visual {
-    order: -1;
-  }
-  .hero__content {
-    padding: 24px;
-    text-align: center;
-  }
-  .eyebrow-row,
-  .hero__actions {
-    justify-content: center;
-  }
-  .hud-corner--tr,
-  .hud-corner--br {
-    display: none;
-  }
-  .hud-corner--tl {
-    top: 72px;
-  }
+@keyframes flashBang {
+  0% { opacity: 1; transform: scale(0.7); }
+  100% { opacity: 0; transform: scale(1.25); }
 }
